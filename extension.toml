@@ -22,8 +22,7 @@ rev = "main" # 使用 main 分支
 [language_servers.cangjie-lsp]
 name = "Cangjie Language Server"
 languages = ["Cangjie"]
-# 可选: 传递给服务器的参数
-args = ["--stdio"]
+
 [language_servers.cangjie-lsp.language_ids]
 "Cangjie" = "cangjie" # 将语言名称映射到内部语言 ID
 

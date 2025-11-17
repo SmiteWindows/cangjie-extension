@@ -4,3 +4,6 @@ downloads/
 tree-sitter-cangjie.wasm
 **/*.rs.bk
 .DS_Store
+.arts
+.cache
+.zed
