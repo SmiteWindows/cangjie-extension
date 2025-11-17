@@ -14,9 +14,9 @@ file_types = ["cj"]
 kind = "Rust"
 
 # 语法分析器配置
-[grammars.cangjie]
-repository = "https://github.com/SmiteWindows/tree-sitter-cangjie" # 指向语法分析器仓库
-rev = "main" # 使用 main 分支
+# [grammars.cangjie]
+# repository = "https://github.com/SmiteWindows/tree-sitter-cangjie" # 指向语法分析器仓库
+# rev = "main" # 使用 main 分支
 
 # 语言服务器配置，与用户在zed中的配置ID保持一致
 [language_servers.cangjie-lsp]
