@@ -1,0 +1,19 @@
+
+{
+  "lsp": {
+    "cangjie-lsp": {
+      "settings": {
+        "cangjie": {
+          "enableSemanticHighlighting": true,
+          "maxFileSize": 1000000,
+          "checkOnSave": true
+        }
+      }
+    }
+  },
+  "file_types": {
+    "Cangjie": [
+      "cj"
+    ]
+  }
+}

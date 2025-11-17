@@ -1,0 +1,11 @@
+{
+  "name": "zed-cangjie",
+  "version": "0.1.0",
+  "description": "Cangjie language support for Zed editor",
+  "scripts": {
+    "build-grammar": "node scripts/build-grammar.js"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.25.0"
+  }
+}

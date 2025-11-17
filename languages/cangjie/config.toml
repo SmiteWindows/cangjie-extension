@@ -1,0 +1,28 @@
+# languages/cangjie/config.toml
+name = "Cangjie"
+grammar = "cangjie"
+path_suffixes = ["cj"]
+line_comments = ["// "]
+autoclose_before = ";:.,=}])>` \n\t\"" # Characters before which autoclosing pairs should close
+brackets = [
+    { start = "{", end = "}", close = true, newline = true },
+    { start = "[", end = "]", close = true, newline = true },
+    { start = "(", end = ")", close = true, newline = true },
+    { start = "\"", end = "\"", close = true, newline = false, not_in = [
+        "string",
+        "comment",
+    ] },
+    { start = "'", end = "'", close = true, newline = false, not_in = [
+        "string",
+        "comment",
+    ] },
+    { start = "`", end = "`", close = true, newline = false, not_in = [
+        "string",
+        "comment",
+    ] },
+]
+tab_size = 4
+hard_tabs = false
+# Indent patterns can be added if needed
+# increase_indent_pattern = ...
+# decrease_indent_pattern = ...

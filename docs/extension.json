@@ -1,0 +1,99 @@
+
+{
+  "id": "cangjie",
+  "name": "Cangjie",
+  "version": "0.1.0",
+  "description": "Cangjie programming language support for Zed",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cangjie-lang/cangjie-zed-extension"
+  },
+  "authors": [
+    "Cangjie Team"
+  ],
+  "language_servers": {
+    "cangjie-lsp": {
+      "name": "Cangjie Language Server",
+      "language": "cangjie",
+      "config": {
+        "provideFormatter": true,
+        "enableSemanticHighlighting": true
+      },
+      "variants": {
+        "x86_64-unknown-linux-gnu": {
+          "url": "https://github.com/cangjie-lang/cangjie-lsp/releases/download/v0.1.0/cangjie-lsp-x86_64-unknown-linux-gnu.tar.gz",
+          "sha256": "..."
+        },
+        "aarch64-unknown-linux-gnu": {
+          "url": "https://github.com/cangjie-lang/cangjie-lsp/releases/download/v0.1.0/cangjie-lsp-aarch64-unknown-linux-gnu.tar.gz",
+          "sha256": "..."
+        },
+        "x86_64-apple-darwin": {
+          "url": "https://github.com/cangjie-lang/cangjie-lsp/releases/download/v0.1.0/cangjie-lsp-x86_64-apple-darwin.tar.gz",
+          "sha256": "..."
+        },
+        "aarch64-apple-darwin": {
+          "url": "https://github.com/cangjie-lang/cangjie-lsp/releases/download/v0.1.0/cangjie-lsp-aarch64-apple-darwin.tar.gz",
+          "sha256": "..."
+        },
+        "x86_64-pc-windows-msvc": {
+          "url": "https://github.com/cangjie-lang/cangjie-lsp/releases/download/v0.1.0/cangjie-lsp-x86_64-pc-windows-msvc.zip",
+          "sha256": "..."
+        }
+      }
+    }
+  },
+  "languages": [
+    {
+      "name": "Cangjie",
+      "grammar": "cangjie",
+      "path_suffixes": ["cj"],
+      "line_comments": ["// "],
+      "block_comment": ["/*", "*/"],
+      "brackets": [
+        {
+          "start": "{",
+          "end": "}",
+          "close": true,
+          "newline": true
+        },
+        {
+          "start": "[",
+          "end": "]",
+          "close": true,
+          "newline": false
+        },
+        {
+          "start": "(",
+          "end": ")",
+          "close": true,
+          "newline": false
+        }
+      ],
+      "tab_size": 4,
+      "hard_tabs": false,
+      "indentation_based_folding": true,
+      "overrides": {}
+    }
+  ],
+  "grammars": {
+    "cangjie": {
+      "language": "cangjie",
+      "path": "./tree-sitter-cangjie.wasm"
+    }
+  },
+  "tasks": [
+    {
+      "label": "Run Cangjie Program",
+      "command": "cangjie",
+      "args": ["run", "${file}"],
+      "cwd": "${fileDirname}"
+    },
+    {
+      "label": "Build Cangjie Project",
+      "command": "cangjie",
+      "args": ["build", "${file}"],
+      "cwd": "${fileDirname}"
+    }
+  ]
+}

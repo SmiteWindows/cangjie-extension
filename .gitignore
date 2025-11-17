@@ -1,0 +1,6 @@
+<!-- .gitignore -->
+target/
+downloads/
+tree-sitter-cangjie.wasm
+**/*.rs.bk
+.DS_Store

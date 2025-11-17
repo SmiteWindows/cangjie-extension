@@ -1,0 +1,37 @@
+id = "cangjie"
+name = "Cangjie"
+version = "0.1.0"
+schema_version = 1
+description = "Cangjie language support."
+authors = ["Cangjie Team <team@cangjie-lang.org>"]
+languages = ["Cangjie"]
+capabilities = []
+file_types = ["cj"]
+# themes = []
+# icon_themes = []
+
+[lib]
+kind = "Rust"
+
+# 语法分析器配置
+[grammars.cangjie]
+repository = "https://github.com/SmiteWindows/tree-sitter-cangjie" # 指向语法分析器仓库
+rev = "main" # 使用 main 分支
+
+# 语言服务器配置，与用户在zed中的配置ID保持一致
+[language_servers.cangjie-lsp]
+name = "Cangjie Language Server"
+languages = ["Cangjie"]
+# 可选: 传递给服务器的参数
+args = ["--stdio"]
+[language_servers.cangjie-lsp.language_ids]
+"Cangjie" = "cangjie" # 将语言名称映射到内部语言 ID
+
+# Context Servers (可选)
+[context_servers]
+
+# Slash Commands (可选)
+[slash_commands]
+
+# Indexed Docs Providers (可选)
+[indexed_docs_providers]
