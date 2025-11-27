@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 keywords = ["incremental", "parsing", "tree-sitter", "cangjie"]
 categories = ["parser-implementations", "parsing", "text-editors"]
-repository = "https://gitcode.com/Cangjie/cangjie_test"
+repository = "https://github.com/SmiteWindows/cangjie-extension"
 edition = "2021"
 autoexamples = false
 

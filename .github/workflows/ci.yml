@@ -16,49 +16,35 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
-
-    - name: Install dependencies
-      run: cargo install --path .
-
-    - name: Run tests
-      run: cargo test
-
-    - name: Build
-      run: cargo build --release
-
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
 
-    - name: Install tree-sitter-cli
-      run: npm install -g tree-sitter-cli
+    - name: Install dependencies
+      run: npm install
 
     - name: Build tree-sitter grammar
       run: npm run build-grammar
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: cangjie-extension-${{ matrix.os }}
-        path: target/release/libcangjie_extension.so
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+    - name: Run tree-sitter tests
+      run: npm run test
 
-    - name: Upload artifact (Windows)
-      uses: actions/upload-artifact@v4
-      with:
-        name: cangjie-extension-${{ matrix.os }}
-        path: target/release/cangjie_extension.dll
-        if: ${{ matrix.os == 'windows-latest' }}
+  build-rust:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
-    - name: Upload artifact (macOS)
-      uses: actions/upload-artifact@v4
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@master
       with:
-        name: cangjie-extension-${{ matrix.os }}
-        path: target/release/libcangjie_extension.dylib
-        if: ${{ matrix.os == 'macos-latest' }}
+        toolchain: stable
+        override: true
+
+    - name: Run Rust tests
+      run: npm run test-rust
+      working-directory: tree-sitter-cangjie
