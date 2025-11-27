@@ -18,10 +18,7 @@ jobs:
       with:
         node-version: '18'
 
-    - name: Set up PowerShell 7
-      uses: actions/setup-powershell@v2
-      with:
-        pwsh-version: '7.4'
+    
 
     - name: Install dependencies
       run: npm install
