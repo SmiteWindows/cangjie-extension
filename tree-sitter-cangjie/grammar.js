@@ -16,14 +16,6 @@ module.exports = grammar({
     [$.binding_pattern, $.enum_pattern],
     // let 后面跟着通配符和 : 时，既可以作为模式也可以作为类型模式，需要处理冲突
     [$.pattern, $.type_pattern],
-    // 成员访问表达式后面跟着 < 时，既可以作为类型参数也可以作为比较操作，需要处理冲突
-    [$.member_access_expression],
-    // 类型参数后面跟着 <: 时，既可以作为带约束的类型参数也可以作为单独的类型参数，需要处理冲突
-    [$.type_parameter],
-    // 多行原始字符串字面量的 # 字符重复时需要处理冲突
-    [$.multi_line_raw_string_literal],
-    // 结构体体的重复规则需要处理冲突
-    [$.struct_body],
     // @ 后面跟着标识符和括号时，既可以作为注解也可以作为宏调用，需要处理冲突
     [$.annotation, $.macro_invocation],
     // @ 后面跟着标识符和括号内的标识符时，既可以作为绑定模式、枚举模式也可以作为标识符表达式，需要处理冲突
@@ -36,8 +28,6 @@ module.exports = grammar({
     [$.binding_pattern, $.named_argument],
     // @ 后面跟着标识符和括号内的 { ( identifier 时，既可以作为标识符表达式也可以作为lambda参数，需要处理冲突
     [$.identifier_expression, $.lambda_parameter],
-    // 导入声明中的包标识符后面跟着 . 时需要处理冲突
-    [$.package_identifier],
     // let 后面跟着类型标识符和 { 时，既可以作为变量声明也可以作为结构体模式，需要处理冲突
     [$.variable_declaration, $.struct_pattern],
     // 注解中标识符既可以作为绑定模式也可以作为标识符表达式，需要处理冲突
@@ -909,16 +899,6 @@ module.exports = grammar({
     ),
     struct_body: $ => seq(
       '{',
-      optional($.struct_primary_init),
-      repeat(choice(
-        $.struct_init,
-        $.static_init,
-        $.variable_declaration,
-        $.function_declaration,
-        $.operator_declaration,
-        $.property_declaration,
-        $.macro_invocation
-      )),
       optional($.struct_primary_init),
       repeat(choice(
         $.struct_init,
