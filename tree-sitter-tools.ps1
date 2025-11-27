@@ -8,7 +8,7 @@ param(
     [string]$SourceDir = "cangjie_test",
     [array]$TargetDirs = @("tests", "tree-sitter-cangjie/tests"),
     [int]$Count = 50,
-    [string]$RepoUrl = "https://github.com/Cangjie/cangjie_test",
+    [string]$RepoUrl = "https://gitcode.com/Cangjie/cangjie_test",
     [string]$Branch = "main"
 )
 
