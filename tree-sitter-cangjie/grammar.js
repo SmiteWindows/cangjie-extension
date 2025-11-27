@@ -8,29 +8,6 @@ module.exports = grammar({
     /\s+/,
   ],
   conflicts: $ => [
-    [$.expression, $.member_access_expression, $.call_expression, $.index_access_expression, $.unary_expression],
-    [$.expression, $.member_access_expression, $.unary_expression],
-    [$.expression, $.unary_expression],
-    [$.expression, $.call_expression, $.unary_expression],
-    [$.expression, $.index_access_expression, $.unary_expression],
-    [$.expression, $.exponentiation_expression],
-    [$.expression, $.multiplicative_expression],
-    [$.expression, $.additive_expression],
-    [$.expression, $.bitwise_shift_expression],
-    [$.expression, $.relational_expression],
-    [$.expression, $.equality_expression],
-    [$.expression, $.bitwise_and_expression],
-    [$.expression, $.bitwise_xor_expression],
-    [$.expression, $.bitwise_or_expression],
-    [$.expression, $.logical_and_expression],
-    [$.expression, $.logical_or_expression],
-    [$.expression, $.coalescing_expression],
-    [$.expression, $.flow_expression],
-    [$.expression, $.assignment_expression],
-    [$.constant_declaration, $.constant_expression],
-    [$.constant_if_expression, $.parenthesized_constant_expression, $.tuple_constant_expression],
-    [$.constant_identifier, $.type_identifier, $.identifier_expression],
-    [$.constant_pattern, $.primary_expression],
     [$.range_expression],
     [$.range_expression, $.type_cast_expression],
     [$.range_expression, $.type_test_expression],
@@ -162,6 +139,10 @@ module.exports = grammar({
     [$.assignment_expression, $.type_cast_expression],
     [$.assignment_expression, $.range_expression],
     [$.assignment_expression, $.type_test_expression],
+    [$.constant_declaration, $.constant_expression],
+    [$.constant_if_expression, $.parenthesized_constant_expression, $.tuple_constant_expression],
+    [$.constant_pattern, $.primary_expression],
+    [$.constant_identifier, $.type_identifier, $.identifier_expression],
     ],
   word: $ => $.identifier,
 
@@ -382,7 +363,7 @@ module.exports = grammar({
     line_string_content: $ => /[^"\\\r\n$]+|\\./,
     line_string_interpolation: $ => seq(
       '${',
-      repeat($.expression),
+      $.expression,
       '}'
     ),
     multi_line_string_literal: $ => seq(
@@ -394,7 +375,7 @@ module.exports = grammar({
     multi_line_string_content: $ => /[^"\\$]+|\\./,
     multi_line_string_interpolation: $ => seq(
       '${',
-      repeat($.expression),
+      $.expression,
       '}'
     ),
     multi_line_raw_string_literal: $ => seq(
@@ -417,10 +398,7 @@ module.exports = grammar({
       $.identifier,
       optional(seq(':', $.type)),
       '=',
-      choice(
-        $.constant_if_expression,
-        $.constant_expression
-      )
+      $.constant_expression
     ),
     constant_literal: $ => choice(
       $.integer_literal,
@@ -664,48 +642,7 @@ module.exports = grammar({
 
     // 4. 表达式（Expressions）
     // 主表达式入口 - 所有表达式最终解析为这个规则
-    expression: $ => choice(
-      // 优先级表达式链（从最低到最高）
-      $.assignment_expression,
-      $.range_expression,
-      $.type_test_expression,
-      $.type_cast_expression,
-      $.numeric_conversion_expression,
-      $.control_transfer_expression,
-      $.if_expression,
-      $.if_let_expression,
-      $.match_expression,
-      $.for_in_expression,
-      $.while_expression,
-      $.do_while_expression,
-      $.try_expression,
-      $.spawn_expression,
-      $.synchronized_expression,
-      $.quote_expression,
-      $.unquote_expression,
-      $.unquote_splice_expression,
-      $.macro_invocation,
-      $.struct_construction_expression,
-      $.array_construction_expression,
-      $.annotation_expression,
-      $.pointer_access_expression,
-      $.address_of_expression,
-      $.flow_expression,
-      $.coalescing_expression,
-      $.logical_or_expression,
-      $.logical_and_expression,
-      $.bitwise_or_expression,
-      $.bitwise_xor_expression,
-      $.bitwise_and_expression,
-      $.equality_expression,
-      $.relational_expression,
-      $.bitwise_shift_expression,
-      $.additive_expression,
-      $.multiplicative_expression,
-      $.exponentiation_expression,
-      $.unary_expression,
-      $.primary_expression
-    ),
+    expression: $ => $.assignment_expression,
 
     // 标识符表达式（变量/函数引用）
     identifier_expression: $ => $.identifier,
