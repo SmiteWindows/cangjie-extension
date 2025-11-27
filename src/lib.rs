@@ -602,7 +602,7 @@ impl zed::Extension for CangjieExtension {
             && arg == "build"
         {
             let exec_name = get_project_name(&build_task).ok_or("Failed to get project name")?;
-            let program_path = format!("zig-out/bin/{}", exec_name);
+            let program_path = format!("target/debug/{}", exec_name);
 
             Ok(zed::DebugRequest::Launch(zed::LaunchRequest {
                 program: program_path,                      // `program` is `String`
@@ -718,7 +718,7 @@ impl zed::Extension for CangjieExtension {
                 // Example: Highlight the entire label with a literal span
                 zed::CodeLabelSpan::Literal(zed::CodeLabelSpanLiteral {
                     text: completion.label.clone(),       // The text to highlight
-                    highlight_name: Some("".to_string()), // Optional syntax highlight name, e.g., "function". Wrapped in Some.
+                    highlight_name: None, // Optional syntax highlight name, e.g., "function". Wrapped in Some.
                 }),
             ],
             filter_range: zed::Range {
@@ -739,7 +739,7 @@ impl zed::Extension for CangjieExtension {
                 // Example: Highlight the entire symbol name with a literal span
                 zed::CodeLabelSpan::Literal(zed::CodeLabelSpanLiteral {
                     text: symbol.name.clone(),            // The text to highlight
-                    highlight_name: Some("".to_string()), // Optional syntax highlight name, e.g., "type". Wrapped in Some.
+                    highlight_name: None, // Optional syntax highlight name, e.g., "type". Wrapped in Some.
                 }),
             ],
             filter_range: zed::Range {

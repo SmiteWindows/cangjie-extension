@@ -8,8 +8,6 @@ languages = ["Cangjie"]
 capabilities = []
 file_types = ["cj"]
 
-[lib]
-kind = "Rust"
 
 # 语法分析器配置
 [grammars.cangjie]
