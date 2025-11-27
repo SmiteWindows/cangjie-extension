@@ -9,6 +9,7 @@
     "build-wasm": "cd tree-sitter-cangjie && npx tree-sitter build --wasm",
     "generate": "cd tree-sitter-cangjie && npx tree-sitter generate",
     "test": "cd tree-sitter-cangjie && npx tree-sitter test",
+    "test-rust": "cd tree-sitter-cangjie && cargo test",
     "clean": "rm -rf tree-sitter-cangjie/src/parser.c tree-sitter-cangjie/src/parser.h tree-sitter-cangjie/src/tree_sitter/*.h"
   },
   "devDependencies": {
