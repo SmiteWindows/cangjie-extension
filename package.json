@@ -1,6 +1,7 @@
 {
   "name": "zed-cangjie",
   "version": "0.1.0",
+  "type": "module",
   "description": "Cangjie language support for Zed editor",
   "scripts": {
     "build-grammar": "node scripts/build-grammar.js"
