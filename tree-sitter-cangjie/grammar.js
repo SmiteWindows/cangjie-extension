@@ -139,6 +139,8 @@ module.exports = grammar({
     [$.primary_expression, $.spawn_expression],
     [$.type_identifier, $.lambda_parameter],
     [$.assignment_expression, $.type_cast_expression],
+    [$.enum_constant_expression, $.member_access_expression],
+    [$.enum_constant_expression, $.type],
     [$.assignment_expression, $.range_expression],
     [$.assignment_expression, $.type_test_expression],
     [$.constant_declaration, $.constant_expression],
@@ -146,6 +148,21 @@ module.exports = grammar({
     [$.constant_pattern, $.primary_expression],
     [$.constant_identifier, $.type_identifier, $.identifier_expression],
     [$.class_primary_init, $.class_init],
+    [$.type_identifier, $.generic_type, $.identifier_expression],
+    [$.type, $.primary_expression],
+    [$.constant_identifier, $.type_identifier, $.generic_type, $.identifier_expression],
+    [$.enum_constant_expression, $.type, $.primary_expression],
+    [$.call_expression, $.type],
+    [$.type_identifier, $.identifier_expression, $.call_expression],
+    [$.type_identifier, $.identifier_expression, $.call_expression, $.lambda_parameter],
+    [$.type_identifier, $.enum_pattern, $.identifier_expression, $.call_expression],
+    [$.binding_pattern, $.named_argument],
+    [$.type_identifier, $.identifier_expression, $.primary_expression],
+    [$.identifier_expression, $.primary_expression],
+    [$.generic_type, $.identifier_expression, $.primary_expression],
+    [$.type_identifier, $.identifier_expression, $.lambda_parameter, $.primary_expression],
+    [$.identifier_expression, $.lambda_parameter, $.primary_expression],
+    [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression, $.primary_expression],
     ],
   word: $ => $.identifier,
 
@@ -193,7 +210,7 @@ module.exports = grammar({
         'from',
         $.package_identifier
       ),
-      // 通配符导入
+      // 通配符导入 (import * as identifier from package_identifier)
       seq(
         'import',
         '*',
@@ -208,6 +225,12 @@ module.exports = grammar({
         choice('./', '../'),
         $.package_identifier,
         optional(seq('as', $.identifier))
+      ),
+      // 包通配符导入 (import package_identifier.*)
+      seq(
+        'import',
+        $.package_identifier,
+        '.*'
       )
     ),
     import_specifier: $ => choice(
@@ -249,7 +272,7 @@ module.exports = grammar({
     ),
 
     // 1.1 标识符与关键字
-    identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
+    identifier: $ => /[a-z_][a-zA-Z0-9_]*/,
     raw_identifier: $ => /`[a-zA-Z_][a-zA-Z0-9_]*`/,
     keyword: $ => choice(
       // 核心关键字
@@ -509,7 +532,7 @@ module.exports = grammar({
     ),
 
     // 2. 类型系统（Types）
-    type: $ => choice(
+    type: $ => prec(16, choice(
       // 基础类型
       $.primitive_type,
       // 复合类型
@@ -523,7 +546,7 @@ module.exports = grammar({
       // 类型引用
       $.type_identifier,
       $.generic_type,
-    ),
+    )),
 
     primitive_type: $ => choice(
       // 数值类型
@@ -584,11 +607,11 @@ module.exports = grammar({
     ),
 
     // 类型标识符（引用已定义类型）
-    type_identifier: $ => $.identifier,
-
+    type_identifier: $ => /[A-Z][a-zA-Z0-9_]*/,
+    
     // 泛型类型（Type<T1, T2>）
     generic_type: $ => seq(
-      $.identifier,
+      $.type_identifier,
       '<',
       sep1($.type, ','),
       '>'
@@ -656,7 +679,10 @@ module.exports = grammar({
     expression: $ => $.assignment_expression,
 
     // 标识符表达式（变量/函数引用）
-    identifier_expression: $ => $.identifier,
+    identifier_expression: $ => choice(
+      $.identifier,
+      $.type_identifier
+    ),
     
     // 括号表达式（(expr)）
     parenthesized_expression: $ => seq(
@@ -665,9 +691,9 @@ module.exports = grammar({
       ')'
     ),
     
-    // 成员访问表达式（obj.member）
+    // 成员访问表达式（obj.member 或 Type.member）
     member_access_expression: $ => seq(
-      $.primary_expression,
+      choice($.primary_expression, $.type),
       optional('?'),
       '.',
       $.identifier,
@@ -679,14 +705,15 @@ module.exports = grammar({
       '>'
     ),
     
-    // 函数调用表达式（func(arg1, arg2)）
-    call_expression: $ => seq(
-      $.primary_expression,
+    // 函数调用表达式（func(arg1, arg2) 或 Type()）
+    call_expression: $ => prec(15, seq(
+      choice($.identifier, $.type_identifier, $.member_access_expression, $.primary_expression),
       optional('?'),
       '(',
       optional(sep1($.argument, ',')),
       ')'
-    ),
+    )),
+    
     argument: $ => choice(
       $.expression,
       $.named_argument,
@@ -729,6 +756,8 @@ module.exports = grammar({
       $.variable_declaration
     ),
 
+    
+    
     // 表达式优先级层级（从高到低）
     // 1. 基础表达式（最高优先级）
     primary_expression: $ => choice(
@@ -738,7 +767,8 @@ module.exports = grammar({
       $.member_access_expression,
       $.call_expression,
       $.index_access_expression,
-      $.lambda_expression
+      $.lambda_expression,
+      $.numeric_conversion_expression
     ),
     
     // 2. 一元表达式
