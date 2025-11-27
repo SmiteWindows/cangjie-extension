@@ -171,7 +171,13 @@ module.exports = grammar({
     [$.control_transfer_expression, $.flow_expression],
     [$.expression, $.spawn_expression],
     [$.member_access_expression, $.call_expression, $.index_access_expression, $.control_transfer_expression],
-  ],
+    [$.constant_identifier, $.binding_pattern, $.enum_pattern],
+    [$.type_identifier, $.enum_pattern],
+    [$.constant_if_expression, $.binary_constant_expression],
+    [$.constant_if_expression, $.range_constant_expression],
+    [$.constant_expression, $.constant_if_expression],
+    [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern],
+    ],
   word: $ => $.identifier,
 
   rules: {
