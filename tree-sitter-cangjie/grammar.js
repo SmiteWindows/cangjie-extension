@@ -8,6 +8,27 @@ module.exports = grammar({
     /\s+/,
   ],
   conflicts: $ => [
+    [$.expression, $.member_access_expression, $.call_expression, $.index_access_expression, $.unary_expression],
+    [$.expression, $.member_access_expression, $.unary_expression],
+    [$.expression, $.unary_expression],
+    [$.expression, $.call_expression, $.unary_expression],
+    [$.expression, $.index_access_expression, $.unary_expression],
+    [$.expression, $.exponentiation_expression],
+    [$.expression, $.multiplicative_expression],
+    [$.expression, $.additive_expression],
+    [$.expression, $.bitwise_shift_expression],
+    [$.expression, $.relational_expression],
+    [$.expression, $.equality_expression],
+    [$.expression, $.bitwise_and_expression],
+    [$.expression, $.bitwise_xor_expression],
+    [$.expression, $.bitwise_or_expression],
+    [$.expression, $.logical_and_expression],
+    [$.expression, $.logical_or_expression],
+    [$.expression, $.coalescing_expression],
+    [$.expression, $.flow_expression],
+    [$.expression, $.assignment_expression],
+    [$.constant_identifier, $.type_identifier, $.identifier_expression],
+    [$.constant_pattern, $.primary_expression],
     [$.range_expression],
     [$.range_expression, $.type_cast_expression],
     [$.range_expression, $.type_test_expression],
@@ -636,9 +657,13 @@ module.exports = grammar({
     // 4. 表达式（Expressions）
     // 主表达式入口 - 所有表达式最终解析为这个规则
     expression: $ => choice(
+      // 优先级表达式链（从最低到最高）
       $.assignment_expression,
       $.range_expression,
-      // 控制流表达式
+      $.type_test_expression,
+      $.type_cast_expression,
+      $.numeric_conversion_expression,
+      $.control_transfer_expression,
       $.if_expression,
       $.if_let_expression,
       $.match_expression,
@@ -646,27 +671,32 @@ module.exports = grammar({
       $.while_expression,
       $.do_while_expression,
       $.try_expression,
-      $.control_transfer_expression,
-      // 类型相关表达式
-      $.type_test_expression,
-      $.type_cast_expression,
-      $.numeric_conversion_expression,
-      // 并发相关表达式
       $.spawn_expression,
       $.synchronized_expression,
-      // 元编程表达式
       $.quote_expression,
       $.unquote_expression,
       $.unquote_splice_expression,
       $.macro_invocation,
-      // 结构体/数组构造表达式
       $.struct_construction_expression,
       $.array_construction_expression,
-      // 注解表达式
       $.annotation_expression,
-      // 互操作表达式
       $.pointer_access_expression,
-      $.address_of_expression
+      $.address_of_expression,
+      $.flow_expression,
+      $.coalescing_expression,
+      $.logical_or_expression,
+      $.logical_and_expression,
+      $.bitwise_or_expression,
+      $.bitwise_xor_expression,
+      $.bitwise_and_expression,
+      $.equality_expression,
+      $.relational_expression,
+      $.bitwise_shift_expression,
+      $.additive_expression,
+      $.multiplicative_expression,
+      $.exponentiation_expression,
+      $.unary_expression,
+      $.primary_expression
     ),
 
     // 标识符表达式（变量/函数引用）
@@ -743,23 +773,6 @@ module.exports = grammar({
       $.variable_declaration
     ),
 
-    // 基础表达式（最高优先级）
-    primary_expression: $ => choice(
-      $.literal,
-      $.identifier_expression,
-      $.parenthesized_expression,
-      $.member_access_expression,
-      $.call_expression,
-      $.index_access_expression,
-      $.lambda_expression
-    ),
-    
-    // 一元表达式（!expr, -expr, ++expr, --expr）
-    unary_expression: $ => choice(
-      seq(choice('!', '-', '++', '--'), $.primary_expression),
-      $.primary_expression
-    ),
-    
     // 表达式优先级层级（从高到低）
     // 1. 基础表达式（最高优先级）
     primary_expression: $ => choice(
@@ -934,12 +947,6 @@ module.exports = grammar({
       optional(seq(':', $.expression))
     ),
 
-    // 赋值表达式（left = right）
-    assignment_expression: $ => seq(
-      $.left_value_expression,
-      choice('=', '**=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=', '&&=', '||='),
-      $.expression
-    ),
     left_value_expression: $ => choice(
       $.identifier,
       $.member_access_expression,
@@ -950,19 +957,6 @@ module.exports = grammar({
       '(',
       sep1($.left_value_expression, ','),
       ')'
-    ),
-
-    // 空合并表达式（e1 ?? e2）
-    coalescing_expression: $ => seq(
-      $.expression,
-      '??',
-      $.expression
-    ),
-
-    // 流表达式（e1 |> e2 或 e1 ~> e2）
-    flow_expression: $ => choice(
-      seq($.expression, '|>', $.expression),
-      seq($.expression, '~>', $.expression)
     ),
 
     // If 表达式（if (cond) { ... } else { ... }）
