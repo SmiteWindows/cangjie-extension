@@ -1,7 +1,12 @@
 // scripts/build-grammar.js
 import { existsSync, copyFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { execSync } from "child_process";
+
+// 获取当前文件的目录路径，替代 __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 function buildTreeSitterGrammar() {
   try {
@@ -19,19 +24,9 @@ function buildTreeSitterGrammar() {
       console.log("Generating tree-sitter parser...");
       execSync("tree-sitter generate", { stdio: "inherit" });
 
-      // 构建WASM版本
-      console.log("Building WASM parser...");
-      execSync("tree-sitter build-wasm", { stdio: "inherit" });
-
-      // 复制到扩展目录
-      const wasmFile = join(grammarDir, "tree-sitter-cangjie.wasm");
-      const targetDir = join(__dirname, "..");
-      const targetFile = join(targetDir, "tree-sitter-cangjie.wasm");
-
-      if (existsSync(wasmFile)) {
-        copyFileSync(wasmFile, targetFile);
-        console.log("WASM parser copied to extension root");
-      }
+      // 构建解析器
+      console.log("Building parser...");
+      execSync("tree-sitter build", { stdio: "inherit" });
     } else {
       console.log(
         "tree-sitter-cangjie directory not found, skipping grammar build",

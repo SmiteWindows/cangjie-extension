@@ -251,15 +251,20 @@ export default grammar({
     identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
 
     string: $ => choice(
-      seq('"', /[^"]*/, '"'),
-      seq("'", /[^']*/, "'")
+      seq('"', /[^"\\]*(\\.[^"\\]*)*"/),
+      seq("'", /[^'\\]*(\\.[^'\\]*)*"/)
     ),
 
     number: $ => /0|[1-9][0-9]*|0x[0-9a-fA-F]+|0b[01]+/,
 
     boolean: $ => choice('true', 'false'),
 
-    comment: $ => token(seq(choice('//', '/*'), /[^]*?(?=\*\/|[\n\r])/)),
+    comment: $ => choice(
+      // 单行注释
+      token(seq('//', /.*/)),
+      // 多行注释
+      token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/'))
+    ),
   }
 });
 

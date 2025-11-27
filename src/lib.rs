@@ -573,7 +573,7 @@ impl zed::Extension for CangjieExtension {
             "name": "Launch Cangjie Program",
             "type": "cjc-frontend", // The adapter name
             "request": "launch",
-            "program": "${workspaceFolder}/zig-out/bin/executable_name", // Placeholder, resolved by `run_dap_locator`
+            "program": "${workspaceFolder}/target/debug/${workspaceFolderBasename}", // Placeholder, resolved by `run_dap_locator`
             "cwd": "${workspaceFolder}",
             "args": [],
             "stopOnEntry": false,
@@ -798,7 +798,7 @@ mod tests {
 
     #[test]
     fn test_extension_initialization() {
-        let extension = CangjieExtension::new();
+        let _extension = CangjieExtension::new();
         // 测试扩展是否成功初始化
         assert!(true);
     }
