@@ -47,4 +47,3 @@ jobs:
 
     - name: Run Rust tests
       run: npm run test-rust
-      working-directory: tree-sitter-cangjie

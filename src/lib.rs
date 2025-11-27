@@ -43,6 +43,7 @@ impl CangjieExtension {
     /// 1. Check user configuration for SDK path (project setting via LspSettings).
     /// 2. Check the `CANGJIE_HOME` environment variable.
     /// 3. Attempt to infer from the current executable's location.
+    /// 4. Use default SDK path if available.
     fn resolve_sdk_root(&self, worktree: &zed::Worktree) -> Result<PathBuf, String> {
         // 1. Check user configuration for SDK path via LspSettings
         if let Ok(lsp_settings) = LspSettings::for_worktree("cangjie", worktree)
@@ -123,7 +124,36 @@ impl CangjieExtension {
             }
         }
 
-        Err(ERR_SDK_NOT_FOUND.to_string())
+        // 4. Try default SDK paths based on OS
+        let default_paths = match std::env::consts::OS {
+            "windows" => [
+                PathBuf::from("C:\\Program Files\\Cangjie"),
+                PathBuf::from("C:\\Program Files (x86)\\Cangjie"),
+            ],
+            "macos" => [
+                PathBuf::from("/usr/local/opt/cangjie"),
+                PathBuf::from("/opt/homebrew/opt/cangjie"),
+            ],
+            _ => [
+                PathBuf::from("/usr/local/cangjie"),
+                PathBuf::from("/opt/cangjie"),
+            ],
+        };
+
+        for default_path in default_paths {
+            if default_path.exists() && default_path.is_dir() && default_path.join("bin").is_dir() {
+                log::info!("Using default SDK path: {:?}", default_path);
+                return Ok(default_path);
+            }
+        }
+
+        // 5. Fallback: Use current directory as temporary SDK root (for development)
+        let current_dir = env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+        log::warn!("Could not find SDK root, using current directory for development: {:?}", current_dir);
+        log::warn!("Please set {} environment variable or configure '{}' in settings for production use", 
+                  ENV_CANGJIE_HOME, CONFIG_SDK_PATH_KEY);
+        
+        Ok(current_dir)
     }
 
     /// Resolves the full path to a specific tool binary within the SDK or via override.

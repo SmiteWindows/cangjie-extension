@@ -10,30 +10,40 @@ const __dirname = dirname(__filename);
 
 function buildTreeSitterGrammar() {
   try {
-    // 检查是否有tree-sitter CLI
-    execSync("npm list -g tree-sitter-cli || npm install -g tree-sitter-cli", {
-      stdio: "pipe",
-    });
-
     const grammarDir = join(__dirname, "..", "tree-sitter-cangjie");
 
     if (existsSync(grammarDir)) {
-      process.chdir(grammarDir);
-
       // 生成解析器
       console.log("Generating tree-sitter parser...");
-      execSync("tree-sitter generate", { stdio: "inherit" });
+      execSync("npx tree-sitter generate", {
+        cwd: grammarDir,
+        stdio: "inherit",
+      });
 
       // 构建解析器
       console.log("Building parser...");
-      execSync("tree-sitter build", { stdio: "inherit" });
+      execSync("npx tree-sitter build", {
+        cwd: grammarDir,
+        stdio: "inherit",
+      });
+
+      // 尝试WASM构建，优雅处理失败
+      console.log("Attempting WASM build (optional)...");
+      try {
+        execSync("npx tree-sitter build --wasm", {
+          cwd: grammarDir,
+          stdio: "inherit",
+        });
+      } catch (wasmError) {
+        console.warn("WASM build failed (optional feature, may require emcc/docker):", wasmError.message);
+      }
     } else {
-      console.log(
-        "tree-sitter-cangjie directory not found, skipping grammar build",
-      );
+      console.error("Error: tree-sitter-cangjie directory not found, skipping grammar build");
+      process.exitCode = 1;
     }
   } catch (error) {
     console.error("Error building tree-sitter grammar:", error.message);
+    process.exitCode = 1;
   }
 }
 
