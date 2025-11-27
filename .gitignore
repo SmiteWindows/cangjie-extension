@@ -8,3 +8,11 @@ tree-sitter-cangjie.wasm
 .cache
 .zed
 grammars/cangjie/
+tree-sitter-cangjie/cangjie.dll
+tree-sitter-cangjie/parser.exp
+tree-sitter-cangjie/parser.lib
+tree-sitter-cangjie/parser.obj
+tree-sitter-cangjie/scanner.obj
+tree-sitter-cangjie/src/grammar.json
+tree-sitter-cangjie/src/node-types.json
+tree-sitter-cangjie/src/tree_sitter/
