@@ -3,8 +3,6 @@
   (pattern
     (binding_pattern
       (identifier) @definition.var)))
-(constant_declaration
-  (identifier) @definition.constant)
 
 ; Function declarations
 (function_declaration
@@ -15,8 +13,6 @@
   (identifier) @definition.class)
 (struct_declaration
   (identifier) @definition.struct)
-(interface_declaration
-  (identifier) @definition.interface)
 (enum_declaration
   (identifier) @definition.enum)
 
@@ -38,7 +34,5 @@
   (class_body) @scope)
 (struct_declaration
   (struct_body) @scope)
-(interface_declaration
-  (interface_body) @scope)
 (enum_declaration
   (enum_body) @scope)

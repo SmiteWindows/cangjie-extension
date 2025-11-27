@@ -20,8 +20,6 @@
 (variable_declaration
   (pattern
     (binding_pattern) @variable))
-(constant_declaration
-  (identifier) @constant)
 
 ; Variable references
 (identifier_expression
@@ -32,17 +30,11 @@
 ; Literals
 (literal) @literal
 (string_literal) @string
-(integer_literal) @number
-(float_literal) @number.float
 (boolean_literal) @boolean
 (unit_literal) @constant
 (none_literal) @constant
-
-; Operators
-(operator) @operator
-
-; Punctuation
-[ "(" ")" "[" "]" "{" "}" "," ";" ":" ] @punctuation.bracket
+(nothing_literal) @constant
+(rune_literal) @string.special
 
 ; Comments
 (comment) @comment

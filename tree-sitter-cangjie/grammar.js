@@ -8,356 +8,132 @@ module.exports = grammar({
     /\s+/,
   ],
   conflicts: $ => [
-    [$.range_expression],
-    [$.range_expression, $.type_cast_expression],
-    [$.range_expression, $.type_test_expression],
-    [$.range_expression, $.control_transfer_expression],
-    [$.range_expression, $.address_of_expression],
-    [$.lambda_expression, $.macro_block_argument],
-    [$.struct_constant_expression, $.type],
-    [$.super_class_or_interfaces],
-    [$.type_identifier, $.generic_type],
-    [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression],
-    [$.constant_identifier, $.identifier_expression],
-    [$.binding_pattern, $.annotation_argument],
-    [$.type_identifier, $.enum_pattern, $.identifier_expression],
-    [$.constant_identifier, $.generic_type, $.identifier_expression],
-    [$.primitive_type, $.numeric_type],
-    [$.constant_pattern, $.expression],
-    [$.literal, $.constant_expression],
-    [$.struct_constant_expression, $.type, $.struct_pattern],
-    [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern, $.left_value_expression],
-    [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression, $.left_value_expression],
-    [$.constant_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression],
-    [$.constant_identifier, $.type_identifier, $.left_value_expression],
-    [$.constant_identifier, $.type_identifier, $.identifier_expression, $.left_value_expression],
-    [$.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression],
-    [$.enum_pattern, $.identifier_expression],
-    [$.binding_pattern, $.enum_pattern, $.identifier_expression],
-    [$.type, $.struct_pattern],
-    [$.type_identifier, $.binding_pattern, $.enum_pattern, $.left_value_expression],
-    [$.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression, $.left_value_expression],
-    [$.multi_line_raw_string_literal],
-    [$.binding_pattern, $.enum_pattern],
-    [$.constant_declaration, $.binding_pattern, $.enum_pattern],
-    [$.literal, $.constant_literal],
-    [$.pattern, $.type_pattern],
-    [$.type_identifier, $.identifier_expression],
-    [$.constant_identifier, $.generic_type],
-    [$.identifier_expression, $.left_value_expression],
-    [$.type_identifier, $.binding_pattern, $.enum_pattern],
-    [$.lambda_expression, $.block],
-    [$.block, $.interpolated_quote],
-    [$.expression, $.interpolated_quote],
-    [$.member_access_expression],
-    [$.generic_type, $.identifier_expression],
-    [$.integer_literal, $.float_literal],
+    // Nothing 既可以作为字面量也可以作为类型，需要处理冲突
     [$.nothing_literal, $.primitive_type],
-    [$.control_transfer_expression],
-    [$.expression, $._expression],
-    [$.expression, $._expression, $.spawn_expression],
-    [$.spawn_expression, $._expression],
-    [$.annotation, $.macro_invocation],
-    [$.class_body],
-    [$.struct_body],
-    [$.line_string_interpolation, $.member_access_expression],
-    [$.line_string_interpolation, $.call_expression],
-    [$.line_string_interpolation, $.index_access_expression],
-    [$.line_string_interpolation, $.member_access_expression, $.call_expression, $.index_access_expression],
-    [$.left_value_expression, $._expression],
-    [$.variable_declaration, $.annotation],
+    // 类型标识符后面跟着 < 时，既可以作为泛型类型也可以作为标识符表达式，需要处理冲突
+    [$.generic_type, $.identifier_expression],
+    // let 后面跟着标识符和 @ 时，既可以作为绑定模式也可以作为枚举模式，需要处理冲突
+    [$.binding_pattern, $.enum_pattern],
+    // let 后面跟着通配符和 : 时，既可以作为模式也可以作为类型模式，需要处理冲突
+    [$.pattern, $.type_pattern],
+    // 成员访问表达式后面跟着 < 时，既可以作为类型参数也可以作为比较操作，需要处理冲突
+    [$.member_access_expression],
+    // 类型参数后面跟着 <: 时，既可以作为带约束的类型参数也可以作为单独的类型参数，需要处理冲突
     [$.type_parameter],
-    [$.foreign_function_declaration, $.modifier],
-    [$.foreign_type_declaration, $.modifier],
-    [$.modifier, $.static_function_declaration],
-    [$.modifier, $.class_member_modifier],
-    [$.modifier, $.static_init],
-    [$.function_parameters, $.class_primary_init],
-    [$.unary_constant_expression, $.binary_constant_expression],
-    [$.unary_constant_expression, $.range_constant_expression],
-    [$.range_constant_expression, $.binary_constant_expression],
-    [$.range_constant_expression],
-    [$.constant_identifier, $.type_identifier],
-    [$.parenthesized_constant_expression, $.tuple_constant_expression],
-    [$.binary_constant_expression],
-    [$.identifier_expression, $.lambda_parameter],
-    [$.type_identifier, $.identifier_expression, $.lambda_parameter],
-    [$.member_access_expression, $.expression_or_declaration],
-    [$.call_expression, $.expression_or_declaration],
-    [$.index_access_expression, $.expression_or_declaration],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.expression_or_declaration],
-    [$.variable_declaration, $.annotation_expression],
-    [$.struct_construction_expression, $.pointer_type],
-    [$.member_access_expression, $.pointer_access_expression],
-    [$.type_cast_expression, $.pointer_access_expression],
-    [$.call_expression, $.pointer_access_expression],
-    [$.range_expression, $.pointer_access_expression],
-    [$.index_access_expression, $.pointer_access_expression],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.pointer_access_expression],
-    [$.type_test_expression, $.pointer_access_expression],
-    [$.coalescing_expression, $.pointer_access_expression],
-    [$.flow_expression, $.pointer_access_expression],
-    [$.member_access_expression, $.unary_expression],
-    [$.unary_expression, $.type_cast_expression],
-    [$.call_expression, $.unary_expression],
-    [$.unary_expression, $.range_expression],
-    [$.index_access_expression, $.unary_expression],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.unary_expression],
-    [$.unary_expression, $.type_test_expression],
-    [$.unary_expression, $.coalescing_expression],
-    [$.unary_expression, $.flow_expression],
-    [$.expression, $._expression, $.left_value_expression],
-    [$.type_identifier, $.left_value_expression],
-    [$.type_identifier, $.identifier_expression, $.left_value_expression],
-    [$.expression, $.left_value_expression],
-    [$.member_access_expression, $.address_of_expression],
-    [$.type_cast_expression, $.address_of_expression],
-    [$.call_expression, $.address_of_expression],
-    [$.range_expression, $.address_of_expression],
-    [$.index_access_expression, $.address_of_expression],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.address_of_expression],
-    [$.type_test_expression, $.address_of_expression],
-    [$.coalescing_expression, $.address_of_expression],
-    [$.flow_expression, $.address_of_expression],
-    [$.member_access_expression, $.control_transfer_expression],
-    [$.control_transfer_expression, $.type_cast_expression],
-    [$.call_expression, $.control_transfer_expression],
-    [$.range_expression, $.control_transfer_expression],
-    [$.index_access_expression, $.control_transfer_expression],
-    [$.control_transfer_expression, $.type_test_expression],
-    [$.control_transfer_expression, $.coalescing_expression],
-    [$.control_transfer_expression, $.flow_expression],
-    [$.expression, $.spawn_expression],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.control_transfer_expression],
-    [$.constant_identifier, $.binding_pattern, $.enum_pattern],
-    [$.type_identifier, $.enum_pattern],
-    [$.constant_if_expression, $.binary_constant_expression],
-    [$.constant_if_expression, $.range_constant_expression],
-    [$.constant_expression, $.constant_if_expression],
-    [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern],
-    [$.unary_expression, $._expression],
-    [$.primary_expression, $.spawn_expression],
-    [$.type_identifier, $.lambda_parameter],
-    [$.assignment_expression, $.type_cast_expression],
-    [$.enum_constant_expression, $.member_access_expression],
-    [$.enum_constant_expression, $.type],
-    [$.assignment_expression, $.range_expression],
-    [$.assignment_expression, $.type_test_expression],
-    [$.constant_declaration, $.constant_expression],
-    [$.constant_if_expression, $.parenthesized_constant_expression, $.tuple_constant_expression],
+    // 多行原始字符串字面量的 # 字符重复时需要处理冲突
+    [$.multi_line_raw_string_literal],
+    // 结构体体的重复规则需要处理冲突
+    [$.struct_body],
+    // @ 后面跟着标识符和括号时，既可以作为注解也可以作为宏调用，需要处理冲突
+    [$.annotation, $.macro_invocation],
+    // @ 后面跟着标识符和括号内的标识符时，既可以作为绑定模式、枚举模式也可以作为标识符表达式，需要处理冲突
+    [$.binding_pattern, $.enum_pattern, $.identifier_expression],
+    // @ 后面跟着标识符和括号内的字面量时，既可以作为常量模式也可以作为主表达式，需要处理冲突
     [$.constant_pattern, $.primary_expression],
-    [$.constant_identifier, $.type_identifier, $.identifier_expression],
-    [$.class_primary_init, $.class_init],
-    [$.type_identifier, $.generic_type, $.identifier_expression],
-    [$.type, $.primary_expression],
-    [$.constant_identifier, $.type_identifier, $.generic_type, $.identifier_expression],
-    [$.enum_constant_expression, $.type, $.primary_expression],
-    [$.call_expression, $.type],
-    [$.type_identifier, $.identifier_expression, $.call_expression],
-    [$.type_identifier, $.identifier_expression, $.call_expression, $.lambda_parameter],
-    [$.type_identifier, $.enum_pattern, $.identifier_expression, $.call_expression],
+    // @ 后面跟着标识符和括号内的表达式时，既可以作为注解也可以作为宏参数，需要处理冲突
+    [$.annotation, $.macro_argument],
+    // @ 后面跟着标识符和括号内的标识符后面跟着 : 时，既可以作为绑定模式也可以作为命名参数，需要处理冲突
     [$.binding_pattern, $.named_argument],
-    [$.type_identifier, $.identifier_expression, $.primary_expression],
-    [$.identifier_expression, $.primary_expression],
-    [$.generic_type, $.identifier_expression, $.primary_expression],
-    [$.type_identifier, $.identifier_expression, $.lambda_parameter, $.primary_expression],
-    [$.identifier_expression, $.lambda_parameter, $.primary_expression],
-    [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression, $.primary_expression],
-    ],
-  word: $ => $.identifier,
-
+    // @ 后面跟着标识符和括号内的 { ( identifier 时，既可以作为标识符表达式也可以作为lambda参数，需要处理冲突
+    [$.identifier_expression, $.lambda_parameter],
+    // 导入声明中的包标识符后面跟着 . 时需要处理冲突
+    [$.package_identifier],
+    // let 后面跟着类型标识符和 { 时，既可以作为变量声明也可以作为结构体模式，需要处理冲突
+    [$.variable_declaration, $.struct_pattern],
+    // 注解中标识符既可以作为绑定模式也可以作为标识符表达式，需要处理冲突
+    [$.binding_pattern, $.identifier_expression]
+  ],
   rules: {
-    source_file: $ => repeat($.top_level_declaration),
-
-    // 顶级声明（包含包/导入/导出）
-    top_level_declaration: $ => choice(
-      $.package_declaration,
-      $.import_declaration,
-      $.export_declaration,
-      $.declaration,
-      $.main_function_declaration
+    // 根规则
+    source_file: $ => repeat($.expression_or_declaration),
+    
+    // 表达式或声明（用于支持混合表达式和声明的上下文）
+    expression_or_declaration: $ => choice(
+      $.expression,
+      $.declaration
     ),
     
-    // 特殊的main函数声明（不需要func关键字）
-    main_function_declaration: $ => seq(
-      'main',
-      $.function_parameters,
-      optional(seq(':', $.type)),
-      $.block
-    ),
-
-    // 11. 包与模块（Packages & Modules）
-    package_declaration: $ => seq(
-      'package',
-      $.package_identifier,
-      optional(seq('from', $.string_literal)) // 可选包路径
-    ),
-    package_identifier: $ => seq($.identifier, repeat(seq('.', $.identifier))),
-
-    import_declaration: $ => choice(
-      // 基础导入
-      seq(
-        'import',
-        $.package_identifier,
-        optional(seq('as', $.identifier))
-      ),
-      // 选择性导入（带重命名）
-      seq(
-        'import',
-        '{',
-        seq($.import_specifier, repeat(seq(',', $.import_specifier))),
-        '}',
-        'from',
-        $.package_identifier
-      ),
-      // 通配符导入 (import * as identifier from package_identifier)
-      seq(
-        'import',
-        '*',
-        'as',
-        $.identifier,
-        'from',
-        $.package_identifier
-      ),
-      // 相对导入
-      seq(
-        'import',
-        choice('./', '../'),
-        $.package_identifier,
-        optional(seq('as', $.identifier))
-      ),
-      // 包通配符导入 (import package_identifier.*)
-      seq(
-        'import',
-        $.package_identifier,
-        '.*'
-      )
-    ),
-    import_specifier: $ => choice(
-      $.identifier,
-      seq($.identifier, 'as', $.identifier),
-      seq('{', seq($.import_specifier, repeat(seq(',', $.import_specifier))), '}') // 嵌套导入
-    ),
-    // 导出声明
-    export_declaration: $ => seq(
-      'export',
-      choice(
-        $.variable_declaration,
-        $.function_declaration,
-        $.class_declaration,
-        $.interface_declaration,
-        $.struct_declaration,
-        $.enum_declaration,
-        $.type_alias_declaration,
-        seq('{', seq($.identifier, repeat(seq(',', $.identifier))), '}') // 批量导出
-      )
-    ),
-
-    // 1. 词法结构（Lexical Structure）
+    // 声明
     declaration: $ => choice(
       $.variable_declaration,
       $.function_declaration,
       $.class_declaration,
-      $.interface_declaration,
       $.struct_declaration,
       $.enum_declaration,
-      $.type_alias_declaration,
       $.extend_declaration,
+      $.type_alias_declaration,
+      $.operator_declaration,
       $.macro_declaration,
-      $.annotation_declaration,
-      $.constant_declaration,
-      $.foreign_function_declaration,
-      $.foreign_type_declaration,
-      $.native_type_alias
+      $.import_declaration
     ),
-
-    // 1.1 标识符与关键字
+    
+    // 导入声明
+    import_declaration: $ => seq(
+      'import',
+      $.package_identifier,
+      optional(seq('.', '*')),
+      optional(seq('as', $.identifier))
+    ),
+    package_identifier: $ => seq(
+      $.identifier,
+      repeat(seq('.', $.identifier))
+    ),
+    
+    // 注解
+    annotation: $ => seq(
+      '@',
+      $.identifier,
+      optional($.type_arguments),
+      optional(seq('(', optional(sep1($.expression, ',')), ')'))
+    ),
+    
+    // 标识符
     identifier: $ => /[a-z_][a-zA-Z0-9_]*/,
     raw_identifier: $ => /`[a-zA-Z_][a-zA-Z0-9_]*`/,
-    keyword: $ => choice(
-      // 核心关键字
-      'as', 'break', 'Bool', 'case', 'catch', 'class', 'const', 'continue', 'Rune',
-      'do', 'else', 'enum', 'extend', 'for', 'from', 'func', 'false', 'finally',
-      'foreign', 'Float16', 'Float32', 'Float64', 'if', 'in', 'is', 'init', 'inout',
-      'import', 'interface', 'Int8', 'Int16', 'Int32', 'Int64', 'IntNative', 'let', 'mut',
-      'main', 'macro', 'match', 'Nothing', 'operator', 'prop', 'package', 'quote', 'return',
-      'spawn', 'super', 'static', 'struct', 'synchronized', 'try', 'this', 'true', 'type',
-      'throw', 'This', 'unsafe', 'Unit', 'UInt8', 'UInt16', 'UInt32', 'UInt64', 'UIntNative',
-      'var', 'VArray', 'where', 'while',
-      // 上下文关键字
-      'abstract', 'open', 'override', 'private', 'protected', 'public', 'redef', 'get', 'set', 'sealed'
-    ),
-
-    // 1.2 注释
+    
+    // 注释
     comment: $ => choice(
-      $.line_comment,
-      $.block_comment
+      $._line_comment,
+      $._block_comment
     ),
-    line_comment: $ => /\/\/.*/,
-    block_comment: $ => /\/\*[\s\S]*?\*\//,
+    _line_comment: $ => token(seq('//', /[\p{Any}&&[^\r\n]]*/)),
+    _block_comment: $ => token(seq('/*', /[\p{Any}]*?/, '*/')),
 
     // 1.3 字面量
     literal: $ => choice(
-      $.integer_literal,
-      $.float_literal,
+      // 整数字面量 - 简化版本，确保能匹配100000u32
+      /[0-9]+u32/,
+      /[0-9]+u64/,
+      /[0-9]+i32/,
+      /[0-9]+i64/,
+      /[0-9]+U32/,
+      /[0-9]+U64/,
+      /[0-9]+I32/,
+      /[0-9]+I64/,
+      /[0-9]+/,
+      // 浮点数字面量
+      /[0-9]+\.[0-9]+(f32|f64)?/,
+      // 其他字面量
       $.rune_literal,
       $.boolean_literal,
       $.string_literal,
       $.unit_literal,
       $.nothing_literal,
-      $.constant_literal,
       $.none_literal
     ),
     none_literal: $ => 'None',
-
-    // 整数字面量（支持二进制、八进制、十进制、十六进制 + 后缀）
-    integer_literal: $ => seq(
-      choice(
-        // 二进制：0b/0B 前缀
-        seq(choice('0b', '0B'), repeat1($.bin_digit), optional($.integer_suffix)),
-        // 八进制：0o/0O 前缀
-        seq(choice('0o', '0O'), repeat1($.octal_digit), optional($.integer_suffix)),
-        // 十进制：无前缀，支持下划线分隔
-        seq($.decimal_literal, optional($.integer_suffix)),
-        // 十六进制：0x/0X 前缀
-        seq(choice('0x', '0X'), repeat1($.hex_digit), optional($.integer_suffix))
-      )
-    ),
+    
+    // 辅助规则，用于其他地方引用
+    decimal_literal: $ => /[1-9][0-9_]*|[0]/,
     bin_digit: $ => /[01]/,
     octal_digit: $ => /[0-7]/,
-    decimal_literal: $ => /[1-9][0-9_]*|[0]/,
     hex_digit: $ => /[0-9a-fA-F]/,
-    integer_suffix: $ => choice('i8', 'i16', 'i32', 'i64', 'u8', 'u16', 'u32', 'u64'),
-
-    // 浮点数字面量（十进制、十六进制 + 后缀）
-    float_literal: $ => seq(
-      choice(
-        // 十进制浮点数
-        seq(
-          choice(
-            seq($.decimal_literal, $.decimal_fraction, optional($.decimal_exponent)),
-            seq($.decimal_literal, $.decimal_exponent),
-            seq($.decimal_fraction, $.decimal_exponent)
-          ),
-          optional($.float_suffix)
-        ),
-        // 十六进制浮点数（必须含指数部分）
-        seq(
-          choice('0x', '0X'),
-          choice(
-            seq(repeat1($.hex_digit), $.hex_fraction),
-            repeat1($.hex_digit)
-          ),
-          $.hex_exponent,
-          optional($.float_suffix)
-        )
-      )
-    ),
-    decimal_fraction: $ => seq('.', $.decimal_fragment),
+    integer_suffix: $ => choice('i8', 'i16', 'i32', 'i64', 'u8', 'u16', 'u32', 'u64', 'I8', 'I16', 'I32', 'I64', 'U8', 'U16', 'U32', 'U64'),
+    decimal_fraction: $ => seq('.', /[0-9_]+/),
     decimal_fragment: $ => /[0-9_]+/,
-    decimal_exponent: $ => seq(choice('e', 'E'), optional(choice('+', '-')), $.decimal_fragment),
-    hex_fraction: $ => seq('.', repeat1($.hex_digit)),
-    hex_exponent: $ => seq(choice('p', 'P'), optional(choice('+', '-')), $.decimal_fragment),
+    decimal_exponent: $ => seq(choice('e', 'E'), optional(choice('+', '-')), /[0-9_]+/),
+    hex_fraction: $ => seq('.', repeat1(/[0-9a-fA-F]/)),
+    hex_exponent: $ => seq(choice('p', 'P'), optional(choice('+', '-')), /[0-9_]+/),
     float_suffix: $ => choice('f16', 'f32', 'f64'),
 
     // Rune 字面量（r + 单/双引号字符串）
@@ -395,7 +171,7 @@ module.exports = grammar({
     line_string_literal: $ => seq(
       choice('"', "'"),
       repeat(choice($.line_string_content, $.line_string_interpolation)),
-      choice('"', "'")
+      choice('"', "'"),
     ),
     line_string_content: $ => /[^"\\\r\n$]+|\\./,
     line_string_interpolation: $ => seq(
@@ -407,7 +183,7 @@ module.exports = grammar({
       choice('"""', "'''"),
       /\r?\n/,
       repeat(choice($.multi_line_string_content, $.multi_line_string_interpolation)),
-      choice('"""', "'''")
+      choice('"""', "'''"),
     ),
     multi_line_string_content: $ => /[^"\\$]+|\\./,
     multi_line_string_interpolation: $ => seq(
@@ -429,24 +205,7 @@ module.exports = grammar({
     nothing_literal: $ => 'Nothing',
 
     // 16. 常量求值（Constant Evaluation）
-    constant_declaration: $ => seq(
-      optional($.annotation),
-      'const',
-      $.identifier,
-      optional(seq(':', $.type)),
-      '=',
-      $.constant_expression
-    ),
-    constant_literal: $ => choice(
-      $.integer_literal,
-      $.float_literal,
-      $.boolean_literal,
-      $.rune_literal,
-      $.string_literal,
-      $.unit_literal
-    ),
-    constant_identifier: $ => $.identifier, // 引用其他常量
-    // 常量表达式（完整语法）
+    // 常量表达式（简化版，用于编译时求值）
     constant_expression: $ => choice(
       $.constant_literal,
       $.constant_identifier,
@@ -457,31 +216,15 @@ module.exports = grammar({
       $.array_constant_expression,
       $.struct_constant_expression,
       $.enum_constant_expression,
-      $.range_constant_expression,
-      $.constant_type_cast,
-      $.constant_if_expression
+      $.range_constant_expression
     ),
-    // 确保if表达式能被正确识别为常量表达式
-    _constant_expression: $ => $.constant_expression,
-    constant_type_cast: $ => seq($.type, '(', $.constant_expression, ')'),
-    // 常量条件表达式（编译期分支消除）
-    constant_if_expression: $ => seq(
-      'if',
-      choice(
-        seq('(', $.constant_expression, ')'),
-        $.constant_expression
-      ),
-      '{',
-      $.constant_expression,
-      '}',
-      optional(seq(
-        'else',
-        choice(
-          '{', $.constant_expression, '}',
-          $.constant_if_expression
-        )
-      ))
-    ),
+    
+    // 常量字面量（直接可求值的字面量）
+    constant_literal: $ => $.literal,
+    
+    // 常量标识符（引用其他常量）
+    constant_identifier: $ => $.identifier,
+    
     // 范围常量表达式
     range_constant_expression: $ => seq(
       $.constant_expression,
@@ -579,7 +322,7 @@ module.exports = grammar({
       $.type,
       ',',
       '$',
-      $.integer_literal,
+      /(0b[01]+|0o[0-7]+|(0|[1-9][0-9_]*)|0x[0-9a-fA-F]+)/,
       '>'
     ),
 
@@ -605,7 +348,10 @@ module.exports = grammar({
       seq('?', $.type),
       seq('Option', '<', $.type, '>')
     ),
-
+    
+    // 指针类型（*T）
+    pointer_type: $ => seq('*', $.type),
+    
     // 类型标识符（引用已定义类型）
     type_identifier: $ => /[A-Z][a-zA-Z0-9_]*/,
     
@@ -625,7 +371,7 @@ module.exports = grammar({
       optional($.annotation),
       repeat($.modifier),
       choice('let', 'var', 'const'),
-      sep1($.pattern, ','),
+      sep1(choice($.pattern, $.type_identifier), ','),
       optional(seq(':', $.type)),
       optional(seq('=', $.expression))
     ),
@@ -648,7 +394,9 @@ module.exports = grammar({
     ),
     enum_pattern: $ => seq(
       $.identifier,
-      optional(seq('(', sep1($.pattern, ','), ')'))
+      '(',
+      sep1($.pattern, ','),
+      ')'
     ),
     type_pattern: $ => seq(
       choice($.wildcard_pattern, $.binding_pattern),
@@ -732,34 +480,12 @@ module.exports = grammar({
     // 索引访问表达式（obj[index]）
     index_access_expression: $ => seq(
       $.primary_expression,
-      optional('?'),
       '[',
-      $.expression,
+      sep1($.expression, ','),
       ']'
     ),
-
-    // Lambda 表达式（{ (params) => body }）
-    lambda_expression: $ => seq(
-      '{',
-      optional($.lambda_parameters),
-      optional('=>'),
-      repeat($.expression_or_declaration),
-      '}'
-    ),
-    lambda_parameters: $ => sep1($.lambda_parameter, ','),
-    lambda_parameter: $ => seq(
-      choice($.identifier, '_'),
-      optional(seq(':', $.type))
-    ),
-    expression_or_declaration: $ => choice(
-      $.expression,
-      $.variable_declaration
-    ),
-
     
-    
-    // 表达式优先级层级（从高到低）
-    // 1. 基础表达式（最高优先级）
+    // 主表达式（基本表达式类型）
     primary_expression: $ => choice(
       $.literal,
       $.identifier_expression,
@@ -771,13 +497,40 @@ module.exports = grammar({
       $.numeric_conversion_expression
     ),
     
-    // 2. 一元表达式
+    // Lambda 表达式（{ x: T => expr } 或 { (x: T) => expr }）
+    lambda_expression: $ => prec(15, seq(
+      '{',
+      optional($.lambda_parameters),
+      '=>',
+      repeat1($.expression_or_declaration),
+      '}'
+    )),
+    lambda_parameters: $ => choice(
+      // 单参数简化形式
+      $.lambda_parameter,
+      // 多参数形式
+      seq('(', sep1($.lambda_parameter, ','), ')')
+    ),
+    lambda_parameter: $ => seq(
+      $.identifier,
+      optional(seq(':', $.type))
+    ),
+    
+    // 数值转换表达式（T(expr)）
+    numeric_conversion_expression: $ => seq(
+      $.type,
+      '(',
+      $.expression,
+      ')'
+    ),
+    
+    // 一元表达式
     unary_expression: $ => choice(
       seq(choice('!', '-', '++', '--'), $.primary_expression),
       $.primary_expression
     ),
     
-    // 3. 幂运算表达式（right associative）
+    // 幂运算表达式（right associative）
     exponentiation_expression: $ => choice(
       prec.right(14, seq(
         $.unary_expression,
@@ -787,7 +540,7 @@ module.exports = grammar({
       $.unary_expression
     ),
     
-    // 4. 乘法表达式（left associative）
+    // 乘法表达式（left associative）
     multiplicative_expression: $ => choice(
       prec.left(13, seq(
         $.exponentiation_expression,
@@ -797,7 +550,7 @@ module.exports = grammar({
       $.exponentiation_expression
     ),
     
-    // 5. 加法表达式（left associative）
+    // 加法表达式（left associative）
     additive_expression: $ => choice(
       prec.left(12, seq(
         $.multiplicative_expression,
@@ -807,7 +560,7 @@ module.exports = grammar({
       $.multiplicative_expression
     ),
     
-    // 6. 位移表达式（left associative）
+    // 位移表达式（left associative）
     bitwise_shift_expression: $ => choice(
       prec.left(11, seq(
         $.additive_expression,
@@ -817,22 +570,17 @@ module.exports = grammar({
       $.additive_expression
     ),
     
-    // 7. 关系表达式（non-associative）
+    // 关系表达式（non-associative）
     relational_expression: $ => choice(
       prec(10, seq(
         $.bitwise_shift_expression,
         choice('<', '<=', '>', '>='),
         $.bitwise_shift_expression
       )),
-      prec(10, seq(
-        $.bitwise_shift_expression,
-        choice('is', 'as'),
-        $.bitwise_shift_expression
-      )),
       $.bitwise_shift_expression
     ),
     
-    // 8. 相等性表达式（non-associative）
+    // 相等性表达式（non-associative）
     equality_expression: $ => choice(
       prec(9, seq(
         $.relational_expression,
@@ -842,7 +590,7 @@ module.exports = grammar({
       $.relational_expression
     ),
     
-    // 9. 位与表达式（left associative）
+    // 位与表达式（left associative）
     bitwise_and_expression: $ => choice(
       prec.left(8, seq(
         $.equality_expression,
@@ -852,7 +600,7 @@ module.exports = grammar({
       $.equality_expression
     ),
     
-    // 10. 位异或表达式（left associative）
+    // 位异或表达式（left associative）
     bitwise_xor_expression: $ => choice(
       prec.left(7, seq(
         $.bitwise_and_expression,
@@ -862,7 +610,7 @@ module.exports = grammar({
       $.bitwise_and_expression
     ),
     
-    // 11. 位或表达式（left associative）
+    // 位或表达式（left associative）
     bitwise_or_expression: $ => choice(
       prec.left(6, seq(
         $.bitwise_xor_expression,
@@ -872,7 +620,7 @@ module.exports = grammar({
       $.bitwise_xor_expression
     ),
     
-    // 12. 逻辑与表达式（left associative）
+    // 逻辑与表达式（left associative）
     logical_and_expression: $ => choice(
       prec.left(5, seq(
         $.bitwise_or_expression,
@@ -882,7 +630,7 @@ module.exports = grammar({
       $.bitwise_or_expression
     ),
     
-    // 13. 逻辑或表达式（left associative）
+    // 逻辑或表达式（left associative）
     logical_or_expression: $ => choice(
       prec.left(4, seq(
         $.logical_and_expression,
@@ -892,7 +640,7 @@ module.exports = grammar({
       $.logical_and_expression
     ),
     
-    // 14. 空合并表达式（left associative）
+    // 空合并表达式（left associative）
     coalescing_expression: $ => choice(
       prec.left(3, seq(
         $.logical_or_expression,
@@ -902,7 +650,7 @@ module.exports = grammar({
       $.logical_or_expression
     ),
     
-    // 15. 流表达式（left associative）
+    // 流表达式（left associative）
     flow_expression: $ => choice(
       prec.left(2, seq(
         $.coalescing_expression,
@@ -912,7 +660,7 @@ module.exports = grammar({
       $.coalescing_expression
     ),
     
-    // 16. 赋值表达式（最低优先级，右结合）
+    // 赋值表达式（最低优先级，右结合）
     assignment_expression: $ => choice(
       prec.right(1, seq(
         $.flow_expression,
@@ -933,378 +681,58 @@ module.exports = grammar({
       optional(seq(':', $.expression))
     ),
 
-    left_value_expression: $ => choice(
-      $.identifier,
-      $.member_access_expression,
-      $.index_access_expression,
-      $.tuple_left_value_expression
-    ),
-    tuple_left_value_expression: $ => seq(
-      '(',
-      sep1($.left_value_expression, ','),
-      ')'
-    ),
-
-    // If 表达式（if (cond) { ... } else { ... }）
-    if_expression: $ => seq(
-      'if',
-      '(',
-      $.expression,
-      ')',
-      $.block,
-      optional(seq('else', choice($.if_expression, $.block)))
-    ),
-
-    // If-let 表达式（if (let pat <- e) { ... }）
-    if_let_expression: $ => seq(
-      'if',
-      '(',
-      'let',
-      $.pattern,
-      '<-',
-      $.expression,
-      ')',
-      $.block,
-      optional(seq('else', choice($.if_expression, $.block)))
-    ),
-
-    // Match 表达式（match (e) { case ... => ... }）
-    match_expression: $ => choice(
-      // 带 selector 的 match
-      seq(
-        'match',
-        '(',
-        $.expression,
-        ')',
-        '{',
-        repeat($.match_case),
-        '}'
-      ),
-      // 不带 selector 的 match
-      seq(
-        'match',
-        '{',
-        repeat($.match_case_no_selector),
-        '}'
-      )
-    ),
-    match_case: $ => seq(
-      'case',
-      sep1($.pattern, '|'),
-      optional($.pattern_guard),
-      '=>',
-      repeat($.expression_or_declaration)
-    ),
-    match_case_no_selector: $ => seq(
-      'case',
-      choice($.expression, '_'),
-      '=>',
-      repeat($.expression_or_declaration)
-    ),
-    pattern_guard: $ => seq(
-      'where',
-      $.expression
-    ),
-    block: $ => seq(
-      '{',
-      repeat($.expression_or_declaration),
-      '}'
-    ),
-
-    // For-in 表达式（for (pat in e where cond) { ... }）
-    for_in_expression: $ => seq(
-      'for',
-      '(',
-      $.pattern,
-      'in',
-      $.expression,
-      optional($.pattern_guard),
-      ')',
-      $.block
-    ),
-
-    // While 表达式（while (cond) { ... }）
-    while_expression: $ => choice(
-      // 普通 while
-      seq(
-        'while',
-        '(',
-        $.expression,
-        ')',
-        $.block
-      ),
-      // While-let 表达式
-      seq(
-        'while',
-        '(',
-        'let',
-        $.pattern,
-        '<-',
-        $.expression,
-        ')',
-        $.block
-      )
-    ),
-
-    // Do-while 表达式（do { ... } while (cond)）
-    do_while_expression: $ => seq(
-      'do',
-      $.block,
-      'while',
-      '(',
-      $.expression,
-      ')'
-    ),
-
-    // Try 表达式（try { ... } catch { ... } finally { ... }）
-    try_expression: $ => choice(
-      // 普通 try
-      seq(
-        'try',
-        $.block,
-        repeat($.catch_clause),
-        optional(seq('finally', $.block))
-      ),
-      // Try-with-resources
-      seq(
-        'try',
-        '(',
-        sep1($.resource_specification, ','),
-        ')',
-        $.block,
-        repeat($.catch_clause),
-        optional(seq('finally', $.block))
-      )
-    ),
-    // 异常类型匹配
-    catch_clause: $ => seq(
-      'catch',
-      '(',
-      choice(
-        $.wildcard_pattern,
-        $.binding_pattern,
-        $.exception_type_pattern
-      ),
-      ')',
-      $.block
-    ),
-    exception_type_pattern: $ => seq(
-      choice($.wildcard_pattern, $.binding_pattern),
-      ':',
-      $.type
-    ),
-    resource_specification: $ => seq(
-      choice('let', 'var'),
-      $.pattern,
-      '=',
-      $.expression
-    ),
-
-    // 控制转移表达式（break, continue, return, throw）
-    control_transfer_expression: $ => choice(
-      'break',
-      'continue',
-      seq('return', optional($.expression)),
-      seq('throw', $.expression)
-    ),
-
-    // 类型测试表达式（e is T）
-    type_test_expression: $ => seq(
-      $.expression,
-      'is',
-      $.type
-    ),
-
-    // 类型转换表达式（e as T）
+    // 类型转换表达式（expr as T）
     type_cast_expression: $ => seq(
       $.expression,
       'as',
       $.type
     ),
 
-    // 数值类型转换表达式（Type(e)）
-    numeric_conversion_expression: $ => seq(
-      $.numeric_type,
-      '(',
+    // 类型测试表达式（expr is T）
+    type_test_expression: $ => seq(
       $.expression,
-      ')'
-    ),
-    numeric_type: $ => choice(
-      'Int8', 'Int16', 'Int32', 'Int64', 'IntNative',
-      'UInt8', 'UInt16', 'UInt32', 'UInt64', 'UIntNative',
-      'Float16', 'Float32', 'Float64'
+      'is',
+      $.type
     ),
 
-    // 结构体构造表达式（Type { field: value, ... }）
-    struct_construction_expression: $ => seq(
-      $.type,
+    // 控制转移表达式（return, break, continue）
+    control_transfer_expression: $ => choice(
+      $.return_expression,
+      $.break_expression,
+      $.continue_expression
+    ),
+    return_expression: $ => seq('return', optional($.expression)),
+    break_expression: $ => seq('break', optional($.identifier)),
+    continue_expression: $ => seq('continue', optional($.identifier)),
+    
+    // 代码块（包含多个表达式或声明）
+    block: $ => seq(
       '{',
-      sep1($.struct_field_initializer, ','),
+      repeat($.expression_or_declaration),
       '}'
-    ),
-    struct_field_initializer: $ => seq(
-      $.identifier,
-      ':',
-      $.expression
-    ),
-
-    // 数组构造表达式（[e1, e2, ...] 或 Array<T>[e1, e2, ...]）
-    array_construction_expression: $ => choice(
-      seq(
-        '[',
-        sep1($.expression, ','),
-        ']'
-      ),
-      seq(
-        $.array_type,
-        '[',
-        sep1($.expression, ','),
-        ']'
-      )
-    ),
-
-    // 并发相关表达式
-    // Spawn 表达式（spawn { ... } 或 spawn func()）
-    spawn_expression: $ => seq(
-      'spawn',
-      choice(
-        $.block,
-        $.call_expression,
-        $.lambda_expression
-      )
-    ),
-    // Synchronized 表达式（synchronized (lock) { ... }）
-    synchronized_expression: $ => seq(
-      'synchronized',
-      '(',
-      $.expression,
-      ')',
-      $.block
-    ),
-
-    // 14. 元编程（Metaprogramming）
-    // Quote 表达式（支持不同引用模式）
-    quote_expression: $ => choice(
-      // 表达式引用
-      seq('quote', '(', $.expression, ')'),
-      // 块引用
-      seq('quote', $.block),
-      // 类型引用
-      seq('quote', '<', $.type, '>'),
-      // 插值引用
-      $.interpolated_quote
-    ),
-    interpolated_quote: $ => seq(
-      'quote',
-      '{',
-      repeat(choice($.quote_fragment, $.unquote_expression, $.unquote_splice_expression)),
-      '}'
-    ),
-    quote_fragment: $ => /[^{}]+/,
-    // 普通解引用
-    unquote_expression: $ => seq('${', $.expression, '}'),
-    // 拼接解引用（用于数组/元组）
-    unquote_splice_expression: $ => seq('$${', $.expression, '}'),
-
-    // 17. 注解（Annotation）细节
-    // 注解声明（带参数）
-    annotation_declaration: $ => seq(
-      repeat($.modifier),
-      'annotation',
-      $.identifier,
-      optional($.type_parameters),
-      $.annotation_parameters,
-      optional($.generic_constraints),
-      optional($.annotation_body)
-    ),
-    annotation_parameters: $ => seq(
-      '(',
-      optional(sep1($.annotation_parameter, ',')),
-      ')'
-    ),
-    annotation_parameter: $ => seq(
-      $.identifier,
-      ':',
-      $.type,
-      optional(seq('=', $.constant_expression)) // 默认值
-    ),
-    annotation_body: $ => seq('{', repeat($.annotation_member), '}'),
-    annotation_member: $ => choice(
-      $.variable_declaration,
-      $.function_declaration
-    ),
-    // 注解应用（支持位置参数/命名参数）
-    annotation: $ => seq(
-      '@',
-      $.identifier,
-      optional($.type_arguments),
-      optional(seq(
-        '(',
-        optional(sep1($.annotation_argument, ',')),
-        ')'
-      ))
-    ),
-    annotation_argument: $ => choice(
-      $.constant_expression, // 位置参数
-      seq($.identifier, ':', $.constant_expression) // 命名参数
-    ),
-    // 重复注解
-    repeated_annotation: $ => seq(
-      '@',
-      '[',
-      sep1($.annotation, ','),
-      ']'
-    ),
-    annotation_expression: $ => $.annotation,
-
-    // 13. 互操作（Interop）细节
-    // 外部函数声明（带ABI指定）
-    foreign_function_declaration: $ => seq(
-      'foreign',
-      optional(seq('abi', '(', $.string_literal, ')')), // ABI指定（如C/SystemV）
-      'func',
-      $.identifier,
-      optional($.type_parameters),
-      $.function_parameters,
-      optional(seq(':', $.type)),
-      ';' // 无函数体
-    ),
-    // 外部类型声明
-    foreign_type_declaration: $ => seq(
-      'foreign',
-      choice('class', 'struct', 'enum'),
-      $.identifier,
-      optional($.type_parameters),
-      ';' 
-    ),
-    // 不安全代码块
-    unsafe_block: $ => seq(
-      'unsafe',
-      $.block
-    ),
-    // 指针操作（互操作专用）
-    pointer_type: $ => seq('*', $.type),
-    pointer_access_expression: $ => seq('*', $.expression),
-    address_of_expression: $ => seq('&', $.expression),
-    // 原生类型别名
-    native_type_alias: $ => seq(
-      'type',
-      $.identifier,
-      '=',
-      seq('@', $.identifier) // 绑定原生类型
     ),
 
     // 5. 函数（Functions）
-    function_declaration: $ => seq(
-      optional($.annotation),
-      repeat($.modifier),
-      'func',
-      $.identifier,
-      optional($.type_parameters),
-      $.function_parameters,
-      optional(seq(':', $.type)),
-      optional($.generic_constraints),
-      $.block
+    function_declaration: $ => choice(
+      // 普通函数声明
+      seq(
+        optional($.annotation),
+        repeat($.modifier),
+        'func',
+        $.identifier,
+        optional($.type_parameters),
+        $.function_parameters,
+        optional(seq(':', $.type)),
+        optional($.generic_constraints),
+        $.block
+      ),
+      // main函数特殊处理，不需要func关键字
+      seq(
+        'main',
+        $.function_parameters,
+        optional(seq(':', $.type)),
+        $.block
+      )
     ),
     // 通用修饰符规则
     modifier: $ => choice(
@@ -1328,7 +756,7 @@ module.exports = grammar({
     function_parameters: $ => seq(
       '(',
       optional(sep1($.function_parameter, ',')),
-      ')'
+      ')' 
     ),
     function_parameter: $ => choice(
       // 非命名参数
@@ -1387,38 +815,28 @@ module.exports = grammar({
       'class',
       $.identifier,
       optional($.type_parameters),
-      optional(seq('<:', $.super_class_or_interfaces)),
+      optional($.super_class_or_interfaces),
       optional($.generic_constraints),
       $.class_body
     ),
-    super_class_or_interfaces: $ => choice(
-      seq($.type, optional(seq('&', sep1($.type, '&')))),
+    super_class_or_interfaces: $ => seq(
+      '<:',
       sep1($.type, '&')
     ),
     class_body: $ => seq(
       '{',
-      repeat(choice(
-        $.class_init,
-        $.static_init,
-        $.variable_declaration,
-        $.function_declaration,
-        $.operator_declaration,
-        $.property_declaration,
-        $.class_finalizer,
-        $.macro_invocation
-      )),
       optional($.class_primary_init),
-      repeat(choice(
-        $.class_init,
-        $.static_init,
-        $.variable_declaration,
-        $.function_declaration,
-        $.operator_declaration,
-        $.property_declaration,
-        $.class_finalizer,
-        $.macro_invocation
-      )),
+      repeat($.class_member),
       '}'
+    ),
+    class_member: $ => choice(
+      $.class_init,
+      $.static_init,
+      $.variable_declaration,
+      $.function_declaration,
+      $.operator_declaration,
+      $.property_declaration,
+      $.macro_invocation
     ),
     // 类主构造函数
     class_primary_init: $ => seq(
@@ -1428,13 +846,12 @@ module.exports = grammar({
       optional($.class_primary_init_params),
       ')',
       '{',
-      optional($.super_call),
+      optional($.this_call),
       repeat($.expression_or_declaration),
       '}'
     ),
     class_primary_init_params: $ => sep1($.class_primary_init_param, ','),
     class_primary_init_param: $ => choice(
-      // 普通参数
       seq(
         optional($.class_member_modifier),
         choice('let', 'var'),
@@ -1442,7 +859,6 @@ module.exports = grammar({
         ':',
         $.type
       ),
-      // 命名参数（! 标记）
       seq(
         optional($.class_member_modifier),
         choice('let', 'var'),
@@ -1453,20 +869,19 @@ module.exports = grammar({
         optional(seq('=', $.expression))
       )
     ),
-    class_member_modifier: $ => choice('public', 'private', 'protected', 'internal'),
-    super_call: $ => seq('super', '(', optional(sep1(choice($.expression, $.named_argument), ',')), ')'),
-    // 类构造函数（init或类名）
+    // 类构造函数
     class_init: $ => seq(
-      repeat($.modifier),
-      choice('init', $.identifier),
-      $.function_parameters,
+      optional($.class_member_modifier),
+      'init',
+      '(',
+      optional($.function_parameters),
+      ')',
       '{',
-      optional(choice($.super_call, $.this_call)),
+      optional($.this_call),
       repeat($.expression_or_declaration),
       '}'
     ),
-    this_call: $ => seq('this', '(', optional(sep1($.expression, ',')), ')'),
-    // 静态初始化器
+    // 静态初始化块
     static_init: $ => seq(
       'static',
       'init',
@@ -1476,41 +891,10 @@ module.exports = grammar({
       repeat($.expression_or_declaration),
       '}'
     ),
-    // 类终结器（~init()）
-    class_finalizer: $ => seq(
-      '~',
-      'init',
-      '(',
-      ')',
-      $.block
-    ),
-
-    // 6.2 接口声明
-    interface_declaration: $ => seq(
-      optional($.annotation),
-      repeat($.modifier),
-      'interface',
-      $.identifier,
-      optional($.type_parameters),
-      optional(seq('<:', sep1($.type, '&'))),
-      optional($.generic_constraints),
-      $.interface_body
-    ),
-    interface_body: $ => seq(
-      '{',
-      repeat(choice(
-        $.function_declaration,
-        $.operator_declaration,
-        $.property_declaration,
-        $.static_function_declaration,
-        $.macro_invocation
-      )),
-      '}'
-    ),
-    static_function_declaration: $ => seq(
-      'static',
-      $.function_declaration
-    ),
+    // 类成员修饰符
+    class_member_modifier: $ => choice('public', 'private', 'protected', 'internal'),
+    // this 调用（用于构造函数）
+    this_call: $ => seq('this', '(', optional(sep1($.argument, ',')), ')'),
 
     // 7. 结构体（Structs）
     struct_declaration: $ => seq(
@@ -1525,6 +909,7 @@ module.exports = grammar({
     ),
     struct_body: $ => seq(
       '{',
+      optional($.struct_primary_init),
       repeat(choice(
         $.struct_init,
         $.static_init,
@@ -1718,7 +1103,7 @@ module.exports = grammar({
       optional($.type_arguments),
       '(',
       optional(sep1($.macro_argument, ',')),
-      ')'
+      ')' 
     ),
     macro_argument: $ => choice(
       $.expression,
