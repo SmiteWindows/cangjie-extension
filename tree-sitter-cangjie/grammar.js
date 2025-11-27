@@ -9,8 +9,6 @@ module.exports = grammar({
   ],
   conflicts: $ => [
     [$.range_expression],
-    [$.binary_expression],
-    [$.binary_expression, $.range_expression],
     [$.member_access_expression, $.range_expression],
     [$.range_expression, $.type_cast_expression],
     [$.range_expression, $.type_test_expression],
@@ -43,7 +41,7 @@ module.exports = grammar({
     [$.call_expression, $.range_expression],
     [$.index_access_expression, $.range_expression],
     [$.member_access_expression, $.call_expression, $.index_access_expression, $.range_expression],
-    [$.call_expression, $.member_access_expression],
+
     [$.variable_declaration, $.member_access_expression],
     [$.variable_declaration, $.call_expression],
     [$.variable_declaration, $.index_access_expression],
@@ -73,13 +71,13 @@ module.exports = grammar({
     [$.type_identifier, $.binding_pattern, $.enum_pattern, $.left_value_expression],
     [$.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression, $.left_value_expression],
     [$.multi_line_raw_string_literal],
-    [$.if_expression, $.if_let_expression],
-    [$.match_expression, $.match_case],
-    [$.quote_expression, $.interpolated_quote],
+
+
+
     [$.foreign_function_declaration, $.function_modifier],
     [$.foreign_type_declaration, $.class_modifier],
     [$.foreign_type_declaration, $.struct_modifier],
-    [$.foreign_type_declaration, $.enum_modifier],
+
     [$.binding_pattern, $.enum_pattern],
     [$.constant_declaration, $.binding_pattern, $.enum_pattern],
     [$.literal, $.constant_literal],
@@ -103,16 +101,12 @@ module.exports = grammar({
     [$.class_body],
     [$.struct_body],
     [$.line_string_interpolation, $.member_access_expression],
-    [$.multi_line_string_interpolation, $.member_access_expression],
     [$.line_string_interpolation, $.call_expression],
-    [$.multi_line_string_interpolation, $.call_expression],
     [$.line_string_interpolation, $.index_access_expression],
-    [$.multi_line_string_interpolation, $.index_access_expression],
     [$.line_string_interpolation, $.member_access_expression, $.call_expression, $.index_access_expression],
-    [$.multi_line_string_interpolation, $.member_access_expression, $.call_expression, $.index_access_expression],
     [$.left_value_expression, $._expression],
     [$.variable_declaration, $.annotation],
-    [$.variable_declaration],
+
     [$.type_parameter],
     [$.function_modifier, $.static_function_declaration],
     [$.unary_constant_expression, $.binary_constant_expression],
@@ -177,6 +171,12 @@ module.exports = grammar({
     [$.constant_if_expression, $.range_constant_expression],
     [$.constant_expression, $.constant_if_expression],
     [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern],
+    [$.expression, $.binary_expression],
+    [$.unary_expression, $._expression],
+    [$.primary_expression, $.left_value_expression],
+    [$.primary_expression, $.spawn_expression],
+    [$.binary_expression],
+    [$.constant_pattern, $.primary_expression],
     ],
   word: $ => $.identifier,
 
@@ -673,22 +673,10 @@ module.exports = grammar({
 
     // 4. 表达式（Expressions）
     expression: $ => choice(
-      // 基础表达式
-      $.literal,
-      $.identifier_expression,
-      $.parenthesized_expression,
-      // 复合表达式
-      $.member_access_expression,
-      $.call_expression,
-      $.index_access_expression,
-      $.lambda_expression,
-      // 操作符表达式
-      $.unary_expression,
-      $.binary_expression,
+      // 优先级表达式链
+      $._expression,
       $.range_expression,
       $.assignment_expression,
-      $.coalescing_expression,
-      $.flow_expression,
       // 控制流表达式
       $.if_expression,
       $.if_let_expression,
@@ -794,27 +782,42 @@ module.exports = grammar({
       $.variable_declaration
     ),
 
-    // 一元表达式（!expr, -expr, ++expr, --expr）
-    unary_expression: $ => seq(
-      choice('!', '-', '++', '--'),
-      $.expression
-    ),
-
-    // 二元表达式（expr op expr）
-    binary_expression: $ => seq(
-      $._expression,
-      choice('**', '*', '/', '%', '+', '-', '<<', '>>', '<', '<=', '>', '>=', 'is', 'as', '==', '!=', '&', '^', '|', '&&', '||', '??', '|>', '~>', '=', '**=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=', '&&=', '||='),
-      $._expression
-    ),
-    _expression: $ => choice(
+    // 基础表达式（最高优先级）
+    primary_expression: $ => choice(
       $.literal,
       $.identifier_expression,
       $.parenthesized_expression,
       $.member_access_expression,
       $.call_expression,
       $.index_access_expression,
-      $.lambda_expression,
+      $.lambda_expression
+    ),
+    
+    // 一元表达式（!expr, -expr, ++expr, --expr）
+    unary_expression: $ => seq(
+      choice('!', '-', '++', '--'),
+      $.primary_expression
+    ),
+    
+    // 表达式优先级层级
+    _expression: $ => choice(
       $.unary_expression,
+      $.binary_expression,
+      $.primary_expression
+    ),
+    
+    // 二元表达式（expr op expr）
+    binary_expression: $ => seq(
+      $._expression,
+      choice('**', '*', '/', '%', '+', '-', '<<', '>>', '<', '<=', '>', '>=', 'is', 'as', '==', '!=', '&', '^', '|', '&&', '||', '??', '|>', '~>'),
+      $._expression
+    ),
+    
+    // 赋值表达式（left = right）
+    assignment_expression: $ => seq(
+      $.left_value_expression,
+      choice('=', '**=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=', '&&=', '||='),
+      $.expression
     ),
 
     // 范围表达式（start..end:step 或 start..=end:step）

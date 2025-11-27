@@ -313,31 +313,11 @@
       "required": true,
       "types": [
         {
-          "type": "call_expression",
+          "type": "binary_expression",
           "named": true
         },
         {
-          "type": "identifier_expression",
-          "named": true
-        },
-        {
-          "type": "index_access_expression",
-          "named": true
-        },
-        {
-          "type": "lambda_expression",
-          "named": true
-        },
-        {
-          "type": "literal",
-          "named": true
-        },
-        {
-          "type": "member_access_expression",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
+          "type": "primary_expression",
           "named": true
         },
         {
@@ -638,21 +618,6 @@
       "types": [
         {
           "type": "class_primary_init_param",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "coalescing_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
           "named": true
         }
       ]
@@ -1267,14 +1232,6 @@
           "named": true
         },
         {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "coalescing_expression",
-          "named": true
-        },
-        {
           "type": "control_transfer_expression",
           "named": true
         },
@@ -1283,15 +1240,7 @@
           "named": true
         },
         {
-          "type": "flow_expression",
-          "named": true
-        },
-        {
           "type": "for_in_expression",
-          "named": true
-        },
-        {
-          "type": "identifier_expression",
           "named": true
         },
         {
@@ -1303,18 +1252,6 @@
           "named": true
         },
         {
-          "type": "index_access_expression",
-          "named": true
-        },
-        {
-          "type": "lambda_expression",
-          "named": true
-        },
-        {
-          "type": "literal",
-          "named": true
-        },
-        {
           "type": "macro_invocation",
           "named": true
         },
@@ -1323,19 +1260,15 @@
           "named": true
         },
         {
-          "type": "member_access_expression",
-          "named": true
-        },
-        {
           "type": "numeric_conversion_expression",
           "named": true
         },
         {
-          "type": "parenthesized_expression",
+          "type": "pointer_access_expression",
           "named": true
         },
         {
-          "type": "pointer_access_expression",
+          "type": "primary_expression",
           "named": true
         },
         {
@@ -1509,21 +1442,6 @@
     "type": "float_suffix",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "flow_expression",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "for_in_expression",
@@ -2729,6 +2647,45 @@
     }
   },
   {
+    "type": "primary_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "call_expression",
+          "named": true
+        },
+        {
+          "type": "identifier_expression",
+          "named": true
+        },
+        {
+          "type": "index_access_expression",
+          "named": true
+        },
+        {
+          "type": "lambda_expression",
+          "named": true
+        },
+        {
+          "type": "literal",
+          "named": true
+        },
+        {
+          "type": "member_access_expression",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "primitive_type",
     "named": true,
     "fields": {}
@@ -3741,7 +3698,7 @@
       "required": true,
       "types": [
         {
-          "type": "expression",
+          "type": "primary_expression",
           "named": true
         }
       ]
