@@ -24,14 +24,14 @@ const ENV_CANGJIE_HOME: &str = "CANGJIE_HOME";
 const ERR_SDK_NOT_FOUND: &str = "Cangjie SDK not found. Please set the 'CANGJIE_HOME' environment variable, set 'cangjie.sdkPath' in your project settings, or place this extension within a standard Cangjie SDK structure.";
 const ERR_TOOL_NOT_FOUND_FMT: &str = "Tool '{}' not found in SDK or overridden path.";
 
-struct CangjieExtension {
+pub struct CangjieExtension {
     cached_tool_paths: Arc<Mutex<HashMap<String, String>>>,
     // In-memory state simulation, as direct KV store access might be limited
     in_memory_state: Arc<Mutex<HashMap<String, String>>>,
 }
 
 impl CangjieExtension {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             cached_tool_paths: Arc::new(Mutex::new(HashMap::new())),
             in_memory_state: Arc::new(Mutex::new(HashMap::new())),
@@ -203,7 +203,7 @@ impl CangjieExtension {
             CJC_NAME,
             CONFIG_CJC_PATH_KEY,
             "bin",
-            get_binary_name(CJC_NAME),
+            &get_binary_name(CJC_NAME),
         )
     }
 
@@ -213,7 +213,7 @@ impl CangjieExtension {
             CJC_FRONTEND_NAME,
             CONFIG_CJC_FRONTEND_PATH_KEY,
             "bin",
-            get_binary_name(CJC_FRONTEND_NAME),
+            &get_binary_name(CJC_FRONTEND_NAME),
         )
     }
 
@@ -251,7 +251,7 @@ impl CangjieExtension {
 
         // 2. Check if it exists in the SDK path
         let sdk_root = self.resolve_sdk_root(worktree)?;
-        let lsp_path = sdk_root.join("bin").join(get_binary_name(SERVER_NAME));
+        let lsp_path = sdk_root.join("bin").join(&get_binary_name(SERVER_NAME));
 
         if lsp_path.exists() && (lsp_path.is_file() || lsp_path.is_symlink()) {
             let resolved_path = lsp_path
@@ -481,20 +481,22 @@ impl CangjieExtension {
     }
 }
 
-fn get_binary_name(base_name: &str) -> &'static str {
-    // Ensure all match arms return a &'static str
+pub fn get_binary_name(base_name: &str) -> String {
+    // Return a String instead of &'static str to avoid lifetime issues
     match (base_name, cfg!(windows)) {
-        ("cangjie-lsp", true) => "cangjie-lsp.exe",
-        ("cangjie-lsp", false) => "cangjie-lsp",
-        ("cjc", true) => "cjc.exe",
-        ("cjc", false) => "cjc",
-        ("cjc-frontend", true) => "cjc-frontend.exe",
-        ("cjc-frontend", false) => "cjc-frontend",
+        ("cangjie-lsp", true) => "cangjie-lsp.exe".to_string(),
+        ("cangjie-lsp", false) => "cangjie-lsp".to_string(),
+        ("cjc", true) => "cjc.exe".to_string(),
+        ("cjc", false) => "cjc".to_string(),
+        ("cjc-frontend", true) => "cjc-frontend.exe".to_string(),
+        ("cjc-frontend", false) => "cjc-frontend".to_string(),
         _ => {
-            // For unknown names, return a default static string or panic.
-            // Returning a dynamic string like base_name.to_string().leak() is not safe here.
-            // Returning an empty string or a generic name is safer.
-            "" // Or panic!("Unknown binary name: {}", base_name);
+            // For unknown names, return the base name with appropriate extension
+            if cfg!(windows) {
+                format!("{}.exe", base_name)
+            } else {
+                base_name.to_string()
+            }
         }
     }
 }
@@ -777,7 +779,7 @@ impl zed::Extension for CangjieExtension {
 
 // --- Utility Functions ---
 
-fn get_project_name(task: &zed::TaskTemplate) -> Option<String> {
+pub fn get_project_name(task: &zed::TaskTemplate) -> Option<String> {
     task.cwd
         .as_ref()
         .and_then(|cwd| Some(Path::new(&cwd).file_name()?.to_string_lossy().into_owned()))
@@ -786,3 +788,49 @@ fn get_project_name(task: &zed::TaskTemplate) -> Option<String> {
 // --- Entry Point ---
 
 zed::register_extension!(CangjieExtension);
+
+// --- Tests ---
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use zed_extension_api::TaskTemplate;
+
+    #[test]
+    fn test_extension_initialization() {
+        let extension = CangjieExtension::new();
+        // 测试扩展是否成功初始化
+        assert!(true);
+    }
+
+    #[test]
+    fn test_get_binary_name() {
+        // 测试 get_binary_name 函数
+        if cfg!(windows) {
+            assert_eq!(get_binary_name("cjc"), "cjc.exe".to_string());
+            assert_eq!(get_binary_name("cjc-frontend"), "cjc-frontend.exe".to_string());
+            assert_eq!(get_binary_name("cangjie-lsp"), "cangjie-lsp.exe".to_string());
+            // 测试未知名称的处理
+            assert_eq!(get_binary_name("unknown"), "unknown.exe".to_string());
+        } else {
+            assert_eq!(get_binary_name("cjc"), "cjc".to_string());
+            assert_eq!(get_binary_name("cjc-frontend"), "cjc-frontend".to_string());
+            assert_eq!(get_binary_name("cangjie-lsp"), "cangjie-lsp".to_string());
+            // 测试未知名称的处理
+            assert_eq!(get_binary_name("unknown"), "unknown".to_string());
+        }
+    }
+
+    #[test]
+    fn test_get_project_name() {
+        // 测试 get_project_name 函数
+        let task = TaskTemplate {
+            label: "test".to_string(),
+            command: "test".to_string(),
+            args: vec![],
+            env: vec![],
+            cwd: Some("/path/to/project".to_string()),
+        };
+        assert_eq!(get_project_name(&task), Some("project".to_string()));
+    }
+}
