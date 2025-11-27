@@ -19,15 +19,15 @@ path = "tree-sitter-cangjie"
 scope = "source.cangjie"
 file_types = ["cj"]
 
-# 语言服务器配置（可选，当前未实现）
-# [language_servers.cangjie-lsp]
-# name = "Cangjie Language Server"
-# languages = ["Cangjie"]
-# command = "cangjie-lsp"
-# args = ["--stdio"]
+# 语言服务器配置
+[language_servers.cangjie-lsp]
+name = "Cangjie Language Server"
+languages = ["Cangjie"]
+command = "cangjie-lsp"
+args = ["--stdio"]
 
-# [language_servers.cangjie-lsp.language_ids]
-# "Cangjie" = "cangjie"
+[language_servers.cangjie-lsp.language_ids]
+"Cangjie" = "cangjie"
 
 # Context Servers (可选)
 [context_servers]

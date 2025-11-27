@@ -43,9 +43,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Publish to npm
+    - name: Clean build artifacts
       run: |
-        npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-        npm publish
-      working-directory: tree-sitter-cangjie
-      if: startsWith(github.ref, 'refs/tags/v')
+        rm -rf target/
+        rm -rf node_modules/
+        rm -rf tree-sitter-cangjie/target/
+        rm -rf tree-sitter-cangjie/node_modules/
