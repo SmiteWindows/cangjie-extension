@@ -36,7 +36,7 @@ jobs:
       run: cd tree-sitter-cangjie && cargo build --release
 
     - name: Generate changelog
-      run: pwsh -ExecutionPolicy Bypass -File .\scripts\generate-changelog.ps1
+      run: pwsh -ExecutionPolicy Bypass -File .\generate-changelog.ps1
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
