@@ -3,6 +3,12 @@ const sep1 = (rule, sep) => seq(rule, repeat(seq(sep, rule)));
 
 module.exports = grammar({
   name: 'cangjie',
+  externals: $ => [
+    $.multi_line_raw_string_literal,
+    $.indent,
+    $.dedent,
+    $.newline
+  ],
   extras: $ => [
     $.comment,
     /\s+/,
@@ -181,13 +187,7 @@ module.exports = grammar({
       $.expression,
       '}'
     ),
-    multi_line_raw_string_literal: $ => prec.left(1, seq(
-      repeat1('#'),
-      choice('"', "'"),
-      repeat(/[^"#]+/),
-      choice('"', "'"),
-      repeat1('#')
-    )),
+    
 
     // Unit 字面量（()）
     unit_literal: $ => '()',

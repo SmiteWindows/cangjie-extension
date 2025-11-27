@@ -1361,11 +1361,6 @@
     "fields": {}
   },
   {
-    "type": "multi_line_raw_string_literal",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "multi_line_string_interpolation",
     "named": true,
     "fields": {},
@@ -2385,10 +2380,6 @@
     "named": false
   },
   {
-    "type": "#",
-    "named": false
-  },
-  {
     "type": "$",
     "named": false
   },
@@ -2771,6 +2762,10 @@
   {
     "type": "main",
     "named": false
+  },
+  {
+    "type": "multi_line_raw_string_literal",
+    "named": true
   },
   {
     "type": "multi_line_string_content",
