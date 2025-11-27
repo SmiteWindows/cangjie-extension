@@ -171,12 +171,9 @@ module.exports = grammar({
     [$.constant_if_expression, $.range_constant_expression],
     [$.constant_expression, $.constant_if_expression],
     [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern],
-    [$.expression, $.binary_expression],
+
     [$.unary_expression, $._expression],
-    [$.primary_expression, $.left_value_expression],
     [$.primary_expression, $.spawn_expression],
-    [$.binary_expression],
-    [$.constant_pattern, $.primary_expression],
     ],
   word: $ => $.identifier,
 
@@ -710,17 +707,17 @@ module.exports = grammar({
 
     // 标识符表达式（变量/函数引用）
     identifier_expression: $ => $.identifier,
-
+    
     // 括号表达式（(expr)）
     parenthesized_expression: $ => seq(
       '(',
       $.expression,
       ')'
     ),
-
+    
     // 成员访问表达式（obj.member）
     member_access_expression: $ => seq(
-      $.expression,
+      $.primary_expression,
       optional('?'),
       '.',
       $.identifier,
@@ -731,10 +728,10 @@ module.exports = grammar({
       sep1($.type, ','),
       '>'
     ),
-
+    
     // 函数调用表达式（func(arg1, arg2)）
     call_expression: $ => seq(
-      $.expression,
+      $.primary_expression,
       optional('?'),
       '(',
       optional(sep1($.argument, ',')),
@@ -754,10 +751,10 @@ module.exports = grammar({
       'inout',
       $.expression
     ),
-
+    
     // 索引访问表达式（obj[index]）
     index_access_expression: $ => seq(
-      $.expression,
+      $.primary_expression,
       optional('?'),
       '[',
       $.expression,
@@ -794,31 +791,161 @@ module.exports = grammar({
     ),
     
     // 一元表达式（!expr, -expr, ++expr, --expr）
-    unary_expression: $ => seq(
-      choice('!', '-', '++', '--'),
+    unary_expression: $ => choice(
+      seq(choice('!', '-', '++', '--'), $.primary_expression),
       $.primary_expression
     ),
     
-    // 表达式优先级层级
-    _expression: $ => choice(
-      $.unary_expression,
-      $.binary_expression,
-      $.primary_expression
+    // 表达式优先级层级（从高到低）
+    expression: $ => $.assignment_expression,
+    
+    // 16. 赋值表达式（最低优先级，右结合）
+    assignment_expression: $ => choice(
+      prec.right(1, seq(
+        $.flow_expression,
+        choice('=', '**=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=', '&&=', '||='),
+        $.assignment_expression
+      )),
+      $.flow_expression
     ),
     
-    // 二元表达式（expr op expr）
-    binary_expression: $ => seq(
-      $._expression,
-      choice('**', '*', '/', '%', '+', '-', '<<', '>>', '<', '<=', '>', '>=', 'is', 'as', '==', '!=', '&', '^', '|', '&&', '||', '??', '|>', '~>'),
-      $._expression
+    // 15. 流表达式（left associative）
+    flow_expression: $ => choice(
+      prec.left(2, seq(
+        $.coalescing_expression,
+        choice('|>', '~>'),
+        $.flow_expression
+      )),
+      $.coalescing_expression
     ),
     
-    // 赋值表达式（left = right）
-    assignment_expression: $ => seq(
-      $.left_value_expression,
-      choice('=', '**=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=', '&&=', '||='),
-      $.expression
+    // 14. 空合并表达式（left associative）
+    coalescing_expression: $ => choice(
+      prec.left(3, seq(
+        $.logical_or_expression,
+        '??',
+        $.coalescing_expression
+      )),
+      $.logical_or_expression
     ),
+    
+    // 13. 逻辑或表达式（left associative）
+    logical_or_expression: $ => choice(
+      prec.left(4, seq(
+        $.logical_and_expression,
+        '||',
+        $.logical_or_expression
+      )),
+      $.logical_and_expression
+    ),
+    
+    // 12. 逻辑与表达式（left associative）
+    logical_and_expression: $ => choice(
+      prec.left(5, seq(
+        $.bitwise_or_expression,
+        '&&',
+        $.logical_and_expression
+      )),
+      $.bitwise_or_expression
+    ),
+    
+    // 11. 位或表达式（left associative）
+    bitwise_or_expression: $ => choice(
+      prec.left(6, seq(
+        $.bitwise_xor_expression,
+        '|',
+        $.bitwise_or_expression
+      )),
+      $.bitwise_xor_expression
+    ),
+    
+    // 10. 位异或表达式（left associative）
+    bitwise_xor_expression: $ => choice(
+      prec.left(7, seq(
+        $.bitwise_and_expression,
+        '^',
+        $.bitwise_xor_expression
+      )),
+      $.bitwise_and_expression
+    ),
+    
+    // 9. 位与表达式（left associative）
+    bitwise_and_expression: $ => choice(
+      prec.left(8, seq(
+        $.equality_expression,
+        '&',
+        $.bitwise_and_expression
+      )),
+      $.equality_expression
+    ),
+    
+    // 8. 相等性表达式（non-associative）
+    equality_expression: $ => choice(
+      prec(9, seq(
+        $.relational_expression,
+        choice('==', '!='),
+        $.relational_expression
+      )),
+      $.relational_expression
+    ),
+    
+    // 7. 关系表达式（non-associative）
+    relational_expression: $ => choice(
+      prec(10, seq(
+        $.bitwise_shift_expression,
+        choice('<', '<=', '>', '>='),
+        $.bitwise_shift_expression
+      )),
+      prec(10, seq(
+        $.bitwise_shift_expression,
+        choice('is', 'as'),
+        $.bitwise_shift_expression
+      )),
+      $.bitwise_shift_expression
+    ),
+    
+    // 6. 位移表达式（left associative）
+    bitwise_shift_expression: $ => choice(
+      prec.left(11, seq(
+        $.additive_expression,
+        choice('<<', '>>'),
+        $.bitwise_shift_expression
+      )),
+      $.additive_expression
+    ),
+    
+    // 5. 加法表达式（left associative）
+    additive_expression: $ => choice(
+      prec.left(12, seq(
+        $.multiplicative_expression,
+        choice('+', '-'),
+        $.additive_expression
+      )),
+      $.multiplicative_expression
+    ),
+    
+    // 4. 乘法表达式（left associative）
+    multiplicative_expression: $ => choice(
+      prec.left(13, seq(
+        $.exponentiation_expression,
+        choice('*', '/', '%'),
+        $.multiplicative_expression
+      )),
+      $.exponentiation_expression
+    ),
+    
+    // 3. 幂运算表达式（right associative）
+    exponentiation_expression: $ => choice(
+      prec.right(14, seq(
+        $.unary_expression,
+        '**',
+        $.exponentiation_expression
+      )),
+      $.unary_expression
+    ),
+    
+    // 表达式别名用于 backward compatibility
+    _expression: $ => $.expression,
 
     // 范围表达式（start..end:step 或 start..=end:step）
     range_expression: $ => seq(
