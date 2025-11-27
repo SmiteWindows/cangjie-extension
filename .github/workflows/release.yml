@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Set up PowerShell 7
+      uses: actions/setup-powershell@v2
+      with:
+        pwsh-version: '7.4'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build tree-sitter grammar
+      run: npm run build-grammar
+
+    - name: Run tests
+      run: npm run test
+
+    - name: Build Rust bindings
+      run: cd tree-sitter-cangjie && cargo build --release
+
+    - name: Generate changelog
+      run: pwsh -ExecutionPolicy Bypass -File .\scripts\generate-changelog.ps1
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path: CHANGELOG.md
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish to npm
+      run: |
+        npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+        npm publish
+      working-directory: tree-sitter-cangjie
+      if: startsWith(github.ref, 'refs/tags/v')

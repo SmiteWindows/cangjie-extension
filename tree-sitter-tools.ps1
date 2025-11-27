@@ -1,11 +1,14 @@
 # Tree-sitter Tools Script for Cangjie Language
+#Requires -Version 7.0
+
+using namespace System.IO
 
 param(
     [string]$Action = "help",
     [string]$SourceDir = "cangjie_test",
     [array]$TargetDirs = @("tests", "tree-sitter-cangjie/tests"),
     [int]$Count = 50,
-    [string]$RepoUrl = "https://gitcode.com/Cangjie/cangjie_test",
+    [string]$RepoUrl = "https://github.com/Cangjie/cangjie_test",
     [string]$Branch = "main"
 )
 
@@ -43,44 +46,34 @@ function Show-Help {
 function Check-Dependencies {
     Write-Host "Checking dependencies..."
     
-    # Check if git is installed
-    Write-Host "Checking git..." -NoNewline
-    try {
-        git --version | Out-Null
-        Write-Host " ✓" -ForegroundColor Green
-    } catch {
-        Write-Host " ✗ Missing" -ForegroundColor Red
-        exit 1
+    # Define dependencies to check
+    $dependencies = @(
+        @{ Name = "git"; Command = "git --version" }
+        @{ Name = "cargo"; Command = "cargo --version" }
+        @{ Name = "node"; Command = "node --version" }
+        @{ Name = "npm"; Command = "npm --version" }
+    )
+    
+    # Check each dependency in parallel (PowerShell 7 feature)
+    $results = $dependencies | ForEach-Object -Parallel {
+        $dep = $_
+        try {
+            & $dep.Command | Out-Null
+            [PSCustomObject]@{ Name = $dep.Name; Status = $true }
+        } catch {
+            [PSCustomObject]@{ Name = $dep.Name; Status = $false }
+        }
     }
     
-    # Check if cargo is installed
-    Write-Host "Checking cargo..." -NoNewline
-    try {
-        cargo --version | Out-Null
-        Write-Host " ✓" -ForegroundColor Green
-    } catch {
-        Write-Host " ✗ Missing" -ForegroundColor Red
-        exit 1
-    }
-    
-    # Check if node is installed
-    Write-Host "Checking node..." -NoNewline
-    try {
-        node --version | Out-Null
-        Write-Host " ✓" -ForegroundColor Green
-    } catch {
-        Write-Host " ✗ Missing" -ForegroundColor Red
-        exit 1
-    }
-    
-    # Check if npm is installed
-    Write-Host "Checking npm..." -NoNewline
-    try {
-        npm --version | Out-Null
-        Write-Host " ✓" -ForegroundColor Green
-    } catch {
-        Write-Host " ✗ Missing" -ForegroundColor Red
-        exit 1
+    # Display results
+    foreach ($result in $results) {
+        Write-Host "Checking $($result.Name)..." -NoNewline
+        if ($result.Status) {
+            Write-Host " ✓" -ForegroundColor Green
+        } else {
+            Write-Host " ✗ Missing" -ForegroundColor Red
+            exit 1
+        }
     }
     
     # Check if tree-sitter-cli is installed
@@ -104,70 +97,92 @@ function Check-Dependencies {
 function Build-TreeSitter {
     Write-Host "Building Tree-sitter parser..."
     
-    # Change to tree-sitter-cangjie directory
-    Set-Location -Path "tree-sitter-cangjie" -ErrorAction Stop
-    
-    # Build Rust bindings
-    Write-Host "Building Rust bindings..."
-    cargo build --release
-    
-    # Build WASM
-    Write-Host "Building WASM..."
-    npx tree-sitter build --wasm
-    
-    # Copy WASM to main directory
-    Copy-Item -Path "*.wasm" -Destination ".." -Force
-    
-    # Change back to original directory
-    Set-Location -Path ".." -ErrorAction SilentlyContinue
-    
-    Write-Host "Tree-sitter parser built successfully!" -ForegroundColor Green
+    try {
+        # Use Push-Location and Pop-Location for better directory management
+        Push-Location -Path "tree-sitter-cangjie" -ErrorAction Stop
+        
+        # Build Rust bindings with simplified error handling
+        Write-Host "Building Rust bindings..."
+        cargo build --release
+        
+        # Build WASM
+        Write-Host "Building WASM..."
+        npx tree-sitter build --wasm
+        
+        # Copy WASM to main directory using Join-Path for better path handling
+        $wasmFiles = Get-ChildItem -Path "*.wasm" -ErrorAction SilentlyContinue
+        if ($wasmFiles.Count -gt 0) {
+            $wasmFiles | ForEach-Object {
+                Copy-Item -Path $_.FullName -Destination ".." -Force
+            }
+        }
+        
+        Write-Host "Tree-sitter parser built successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to build Tree-sitter parser: $_" -ForegroundColor Red
+        exit 1
+    } finally {
+        # Always return to original directory
+        Pop-Location -ErrorAction SilentlyContinue
+    }
 }
 
 # Function to run Tree-sitter tests
 function Test-TreeSitter {
     Write-Host "Running Tree-sitter tests..."
     
-    # Change to tree-sitter-cangjie directory
-    Set-Location -Path "tree-sitter-cangjie" -ErrorAction Stop
-    
-    # Run Rust tests
-    Write-Host "Running Rust tests..."
-    cargo test
-    
-    # Run Tree-sitter CLI tests
-    Write-Host "Running Tree-sitter CLI tests..."
-    npx tree-sitter test
-    
-    # Change back to original directory
-    Set-Location -Path ".." -ErrorAction SilentlyContinue
-    
-    Write-Host "Tree-sitter tests passed!" -ForegroundColor Green
+    try {
+        # Use Push-Location and Pop-Location for better directory management
+        Push-Location -Path "tree-sitter-cangjie" -ErrorAction Stop
+        
+        # Run Rust tests with simplified error handling
+        Write-Host "Running Rust tests..."
+        cargo test
+        
+        # Run Tree-sitter CLI tests
+        Write-Host "Running Tree-sitter CLI tests..."
+        npx tree-sitter test
+        
+        Write-Host "Tree-sitter tests passed!" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to run Tree-sitter tests: $_" -ForegroundColor Red
+        exit 1
+    } finally {
+        # Always return to original directory
+        Pop-Location -ErrorAction SilentlyContinue
+    }
 }
 
 # Function to clone external test repository
 function Clone-TestRepository {
     Write-Host "Cloning external test repository..."
     
-    # Check if source directory already exists
-    if (Test-Path -Path $SourceDir -PathType Container) {
-        Write-Host "Source directory $SourceDir already exists. Update? (y/n): " -NoNewline
-        $response = Read-Host
-        if ($response -eq "y" -or $response -eq "Y") {
-            Write-Host "Updating existing repository..."
-            Set-Location -Path $SourceDir -ErrorAction Stop
-            git pull origin $Branch
-            Set-Location -Path ".." -ErrorAction SilentlyContinue
-            Write-Host "Repository updated successfully!" -ForegroundColor Green
+    try {
+        # Check if source directory already exists
+        if (Test-Path -Path $SourceDir -PathType Container) {
+            Write-Host "Source directory $SourceDir already exists. Update? (y/n): " -NoNewline
+            $response = Read-Host
+            if ($response -eq "y" -or $response -eq "Y") {
+                Write-Host "Updating existing repository..."
+                Push-Location -Path $SourceDir -ErrorAction Stop
+                git pull origin $Branch
+                Write-Host "Repository updated successfully!" -ForegroundColor Green
+            } else {
+                Write-Host "Skipping clone operation."
+                return
+            }
         } else {
-            Write-Host "Skipping clone operation."
-            return
+            # Clone new repository with simplified error handling
+            Write-Host "Cloning repository $RepoUrl to $SourceDir..."
+            git clone --branch $Branch $RepoUrl $SourceDir
+            Write-Host "Repository cloned successfully!" -ForegroundColor Green
         }
-    } else {
-        # Clone new repository
-        Write-Host "Cloning repository $RepoUrl to $SourceDir..."
-        git clone --branch $Branch $RepoUrl $SourceDir
-        Write-Host "Repository cloned successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to clone/update repository: $_" -ForegroundColor Red
+        exit 1
+    } finally {
+        # Always return to original directory
+        Pop-Location -ErrorAction SilentlyContinue
     }
 }
 
@@ -175,102 +190,132 @@ function Clone-TestRepository {
 function Copy-TestFiles {
     Write-Host "Copying test files from external repository..."
     
-    # Check if source directory exists
-    if (-not (Test-Path -Path $SourceDir -PathType Container)) {
-        Write-Host "Source directory $SourceDir does not exist" -ForegroundColor Red
-        exit 1
-    }
-    
-    # Get all *.cj file paths
-    $allCjFiles = Get-ChildItem -Path $SourceDir -Filter *.cj -Recurse | Select-Object -ExpandProperty FullName
-    
-    if ($allCjFiles.Count -eq 0) {
-        Write-Host "No *.cj files found in source directory" -ForegroundColor Red
-        exit 1
-    }
-    
-    # Copy files to each target directory
-    foreach ($dir in $TargetDirs) {
-        # Ensure target directory exists
-        if (-not (Test-Path -Path $dir -PathType Container)) {
-            Write-Host "Creating directory $dir..."
-            New-Item -Path $dir -ItemType Directory -Force | Out-Null
+    try {
+        # Check if source directory exists
+        if (-not (Test-Path -Path $SourceDir -PathType Container)) {
+            Write-Host "Source directory $SourceDir does not exist" -ForegroundColor Red
+            exit 1
         }
         
-        Write-Host "Copying files to $dir..."
-        $randomFiles = $allCjFiles | Get-Random -Count $Count
-        $counter = 0
-        $successCount = 0
-        $failedCount = 0
+        # Get all *.cj file paths
+        $allCjFiles = Get-ChildItem -Path $SourceDir -Filter *.cj -Recurse | Select-Object -ExpandProperty FullName
         
-        foreach ($file in $randomFiles) {
-            $counter++
-            $newName = "test_$(Get-Date -Format 'yyyyMMdd_HHmmss')_$counter.cj"
-            $destPath = Join-Path $dir $newName
-            
-            try {
-                Copy-Item -Path $file -Destination $destPath -Force
-                Write-Host "Copied $file to $destPath"
-                $successCount++
-            } catch {
-                Write-Host "Failed to copy $file to $destPath - $_" -ForegroundColor Red
-                $failedCount++
+        if ($allCjFiles.Count -eq 0) {
+            Write-Host "No *.cj files found in source directory" -ForegroundColor Red
+            exit 1
+        }
+        
+        # Copy files to each target directory
+        foreach ($dir in $TargetDirs) {
+            # Ensure target directory exists
+            if (-not (Test-Path -Path $dir -PathType Container)) {
+                Write-Host "Creating directory $dir..."
+                New-Item -Path $dir -ItemType Directory -Force | Out-Null
             }
+            
+            Write-Host "Copying files to $dir..."
+            $randomFiles = $allCjFiles | Get-Random -Count $Count
+            $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+            
+            # Use PowerShell 7 parallel processing for faster copying
+            $results = $randomFiles | ForEach-Object -Parallel {
+                $file = $_
+                $counter = [ref]::new(0)
+                $local:counter.Value++
+                $newName = "test_${using:timestamp}_$($local:counter.Value).cj"
+                $destPath = Join-Path $using:dir $newName
+                
+                try {
+                    Copy-Item -Path $file -Destination $destPath -Force
+                    [PSCustomObject]@{ Success = $true; File = $file; Dest = $destPath }
+                } catch {
+                    [PSCustomObject]@{ Success = $false; File = $file; Dest = $destPath; Error = $_ }
+                }
+            }
+            
+            # Calculate results
+            $successCount = ($results | Where-Object { $_.Success }).Count
+            $failedCount = ($results | Where-Object { -not $_.Success }).Count
+            
+            # Display results
+            $results | ForEach-Object {
+                if ($_.Success) {
+                    Write-Host "Copied $($_.File) to $($_.Dest)"
+                } else {
+                    Write-Host "Failed to copy $($_.File) to $($_.Dest) - $($_.Error)" -ForegroundColor Red
+                }
+            }
+            
+            Write-Host "Finished copying to ${dir}: ${successCount} succeeded, ${failedCount} failed"
         }
         
-        Write-Host "Finished copying to ${dir}: ${successCount} succeeded, ${failedCount} failed"
+        Write-Host "Test files copied successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to copy test files: $_" -ForegroundColor Red
+        exit 1
     }
-    
-    Write-Host "Test files copied successfully!" -ForegroundColor Green
 }
 
 # Function to clean generated files
 function Clean-GeneratedFiles {
     Write-Host "Cleaning generated files..."
     
-    # Clean WASM files in main directory
-    if (Test-Path -Path "*.wasm") {
-        Write-Host "Cleaning WASM files in main directory..."
-        Remove-Item -Path "*.wasm" -Force
-    }
-    
-    # Clean generated files in tree-sitter-cangjie directory
-    if (Test-Path -Path "tree-sitter-cangjie") {
-        Set-Location -Path "tree-sitter-cangjie" -ErrorAction Stop
-        
-        # Clean target directory
-        if (Test-Path -Path "target") {
-            Write-Host "Cleaning target directory..."
-            Remove-Item -Path "target" -Recurse -Force
+    try {
+        # Clean WASM files in main directory with simplified error handling
+        $wasmFiles = Get-ChildItem -Path "*.wasm" -ErrorAction SilentlyContinue
+        if ($wasmFiles.Count -gt 0) {
+            Write-Host "Cleaning WASM files in main directory..."
+            $wasmFiles | Remove-Item -Force
         }
         
-        # Clean WASM files
-        if (Test-Path -Path "*.wasm") {
-            Write-Host "Cleaning WASM files..."
-            Remove-Item -Path "*.wasm" -Force
+        # Clean generated files in tree-sitter-cangjie directory
+        if (Test-Path -Path "tree-sitter-cangjie" -PathType Container) {
+            Push-Location -Path "tree-sitter-cangjie" -ErrorAction Stop
+            
+            # Clean target directory
+            if (Test-Path -Path "target" -PathType Container) {
+                Write-Host "Cleaning target directory..."
+                Remove-Item -Path "target" -Recurse -Force
+            }
+            
+            # Clean WASM files
+            $tsWasmFiles = Get-ChildItem -Path "*.wasm" -ErrorAction SilentlyContinue
+            if ($tsWasmFiles.Count -gt 0) {
+                Write-Host "Cleaning WASM files..."
+                $tsWasmFiles | Remove-Item -Force
+            }
         }
         
-        Set-Location -Path ".." -ErrorAction SilentlyContinue
+        Write-Host "Generated files cleaned successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to clean generated files: $_" -ForegroundColor Red
+        exit 1
+    } finally {
+        # Always return to original directory
+        Pop-Location -ErrorAction SilentlyContinue
     }
-    
-    Write-Host "Generated files cleaned successfully!" -ForegroundColor Green
 }
 
 # Function to update grammar files
 function Update-Grammar {
     Write-Host "Updating grammar files..."
     
-    # Change to tree-sitter-cangjie directory
-    Set-Location -Path "tree-sitter-cangjie" -ErrorAction Stop
-    
-    # Generate grammar files
-    Write-Host "Generating grammar files..."
-    npx tree-sitter generate
-    
-    # Change back to original directory
-    Set-Location -Path ".." -ErrorAction SilentlyContinue
-    
-    Write-Host "Grammar files updated successfully!" -ForegroundColor Green
+    try {
+        # Use Push-Location and Pop-Location for better directory management
+        Push-Location -Path "tree-sitter-cangjie" -ErrorAction Stop
+        
+        # Generate grammar files with simplified error handling
+        Write-Host "Generating grammar files..."
+        npx tree-sitter generate
+        
+        Write-Host "Grammar files updated successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to update grammar files: $_" -ForegroundColor Red
+        exit 1
+    } finally {
+        # Always return to original directory
+        Pop-Location -ErrorAction SilentlyContinue
+    }
 }
 
 # Main script execution

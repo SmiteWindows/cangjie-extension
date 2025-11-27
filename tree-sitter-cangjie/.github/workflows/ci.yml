@@ -11,6 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Set up PowerShell 7
+      uses: actions/setup-powershell@v2
+      with:
+        pwsh-version: '7.4'
+
     - name: Install tree-sitter-cli
       run: npm install -g tree-sitter-cli
     - name: Generate parser
