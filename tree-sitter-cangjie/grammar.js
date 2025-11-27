@@ -64,10 +64,10 @@ module.exports = grammar({
       optional(seq('.', '*')),
       optional(seq('as', $.identifier))
     ),
-    package_identifier: $ => seq(
+    package_identifier: $ => prec.left(1, seq(
       $.identifier,
       repeat(seq('.', $.identifier))
-    ),
+    )),
     
     // 注解
     annotation: $ => seq(
@@ -181,13 +181,13 @@ module.exports = grammar({
       $.expression,
       '}'
     ),
-    multi_line_raw_string_literal: $ => seq(
+    multi_line_raw_string_literal: $ => prec.left(1, seq(
       repeat1('#'),
       choice('"', "'"),
       repeat(/[^"#]+/),
       choice('"', "'"),
       repeat1('#')
-    ),
+    )),
 
     // Unit 字面量（()）
     unit_literal: $ => '()',
@@ -430,13 +430,13 @@ module.exports = grammar({
     ),
     
     // 成员访问表达式（obj.member 或 Type.member）
-    member_access_expression: $ => seq(
+    member_access_expression: $ => prec.left(15, seq(
       choice($.primary_expression, $.type),
       optional('?'),
       '.',
       $.identifier,
       optional($.type_arguments)
-    ),
+    )),
     type_arguments: $ => seq(
       '<',
       sep1($.type, ','),
@@ -734,10 +734,10 @@ module.exports = grammar({
       sep1($.type_parameter, ','),
       '>'
     ),
-    type_parameter: $ => seq(
+    type_parameter: $ => prec.left(1, seq(
       $.identifier,
       optional($.type_parameter_constraint)
-    ),
+    )),
     // 泛型多约束
     type_parameter_constraint: $ => seq(
       '<:',

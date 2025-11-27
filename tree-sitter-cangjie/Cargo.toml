@@ -1,13 +1,13 @@
 [package]
-name = "tree-sitter-yes"
-description = "yes"
+name = "tree-sitter-cangjie"
+description = "Cangjie language parser for Tree-sitter"
 version = "0.1.2"
-authors = ["SmiteWindows <no>"]
+authors = ["Cangjie Team"]
 license = "MIT"
 readme = "README.md"
-keywords = ["incremental", "parsing", "tree-sitter", "yes"]
+keywords = ["incremental", "parsing", "tree-sitter", "cangjie"]
 categories = ["parser-implementations", "parsing", "text-editors"]
-repository = "https://github.com/smitewindows/cangjie-extension"
+repository = "https://gitcode.com/Cangjie/cangjie_test"
 edition = "2021"
 autoexamples = false
 

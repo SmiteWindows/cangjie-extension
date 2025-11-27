@@ -20,12 +20,12 @@
     "description": "Cangjie language grammar for tree-sitter",
     "authors": [
       {
-        "name": "SmiteWindows",
-        "url": "https://github.com/SmiteWindows/"
+        "name": "Cangjie Team",
+        "url": "https://gitcode.com/Cangjie/"
       }
     ],
     "links": {
-      "repository": "https://github.com/SmiteWindows/cangjie-extension"
+      "repository": "https://gitcode.com/Cangjie/cangjie_test"
     }
   },
   "bindings": {
