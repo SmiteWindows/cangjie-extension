@@ -1,25 +1,33 @@
-id = "cangjie"
+[extension]
+id = "cangjie.cangjie"
 name = "Cangjie"
 version = "0.1.0"
 schema_version = 1
-description = "Cangjie language support."
+description = "Cangjie language support for Zed editor"
 authors = ["Cangjie Team <team@cangjie-lang.org>"]
+repository = "https://gitcode.com/Cangjie/cangjie_test"
+license = "MIT"
+categories = ["language", "programming"]
+min_zed_version = "0.214.0"
 languages = ["Cangjie"]
 capabilities = []
 file_types = ["cj"]
 
-
 # 语法分析器配置
 [grammars.cangjie]
-path = "tree-sitter-cangjie" # 指向本地语法分析器目录
+path = "tree-sitter-cangjie"
+scope = "source.cangjie"
+file_types = ["cj"]
 
-# 语言服务器配置，与用户在zed中的配置ID保持一致
+# 语言服务器配置
 [language_servers.cangjie-lsp]
 name = "Cangjie Language Server"
 languages = ["Cangjie"]
+command = "cangjie-lsp"
+args = ["--stdio"]
 
 [language_servers.cangjie-lsp.language_ids]
-"Cangjie" = "cangjie" # 将语言名称映射到内部语言 ID
+"Cangjie" = "cangjie"
 
 # Context Servers (可选)
 [context_servers]

@@ -1,0 +1,27 @@
+{
+  "source.cangjie": {
+    "ctrl+shift+space": "editor::ShowCompletions",
+    "ctrl+space": "editor::ShowSignatureHelp",
+    "f12": "editor::GoToDefinition",
+    "shift+f12": "editor::ShowReferences",
+    "ctrl+r": "editor::ShowSymbolPalette",
+    "ctrl+shift+r": "editor::ShowWorkspaceSymbolPalette",
+    "ctrl+\\": "editor::ToggleSidebar",
+    "ctrl+shift+p": "workspace::ShowCommandPalette",
+    "ctrl+/": "editor::ToggleLineComment",
+    "ctrl+shift+/": "editor::ToggleBlockComment",
+    "alt+down": "editor::MoveLineDown",
+    "alt+up": "editor::MoveLineUp",
+    "shift+alt+down": "editor::CopyLineDown",
+    "shift+alt+up": "editor::CopyLineUp",
+    "ctrl+shift+k": "editor::DeleteLine",
+    "ctrl+enter": "editor::InsertLineBelow",
+    "ctrl+shift+enter": "editor::InsertLineAbove",
+    "ctrl+alt+shift+left": "editor::ExpandSelection",
+    "ctrl+alt+shift+right": "editor::ShrinkSelection",
+    "ctrl+d": "editor::SelectNextOccurrence",
+    "ctrl+shift+l": "editor::SelectAllOccurrences",
+    "ctrl+[ ": "editor::IndentLess",
+    "ctrl+] ": "editor::IndentMore"
+  }
+}

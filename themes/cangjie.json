@@ -1,0 +1,112 @@
+{
+  "name": "Cangjie Default",
+  "type": "light",
+  "colors": {
+    "background": "#ffffff",
+    "foreground": "#000000",
+    "cursor": "#000000",
+    "selection": "#b3d9ff",
+    "selection_secondary": "#e6f2ff",
+    "line_highlight": "#f5f5f5",
+    "gutter": "#f0f0f0",
+    "gutter_active": "#000000",
+    "gutter_foreground": "#808080"
+  },
+  "token_colors": {
+    "comment": {
+      "foreground": "#6a9955"
+    },
+    "string": {
+      "foreground": "#ce9178"
+    },
+    "keyword": {
+      "foreground": "#569cd6",
+      "font_style": "bold"
+    },
+    "keyword.control": {
+      "foreground": "#569cd6",
+      "font_style": "bold"
+    },
+    "keyword.operator": {
+      "foreground": "#d4d4d4"
+    },
+    "number": {
+      "foreground": "#b5cea8"
+    },
+    "constant": {
+      "foreground": "#4ec9b0"
+    },
+    "constant.builtin": {
+      "foreground": "#569cd6"
+    },
+    "type": {
+      "foreground": "#4ec9b0"
+    },
+    "type.builtin": {
+      "foreground": "#4ec9b0"
+    },
+    "function": {
+      "foreground": "#dcdcaa"
+    },
+    "function.builtin": {
+      "foreground": "#dcdcaa"
+    },
+    "variable": {
+      "foreground": "#9cdcfe"
+    },
+    "variable.parameter": {
+      "foreground": "#9cdcfe"
+    },
+    "variable.builtin": {
+      "foreground": "#569cd6"
+    },
+    "punctuation": {
+      "foreground": "#d4d4d4"
+    },
+    "punctuation.bracket": {
+      "foreground": "#d4d4d4"
+    },
+    "punctuation.delimiter": {
+      "foreground": "#d4d4d4"
+    },
+    "operator": {
+      "foreground": "#d4d4d4"
+    },
+    "property": {
+      "foreground": "#9cdcfe"
+    },
+    "property.attribute": {
+      "foreground": "#9cdcfe"
+    },
+    "property.decorator": {
+      "foreground": "#9cdcfe"
+    },
+    "tag": {
+      "foreground": "#569cd6"
+    },
+    "tag.delimiter": {
+      "foreground": "#d4d4d4"
+    },
+    "namespace": {
+      "foreground": "#4ec9b0"
+    },
+    "comment.block.documentation": {
+      "foreground": "#6a9955"
+    },
+    "comment.line.documentation": {
+      "foreground": "#6a9955"
+    },
+    "string.interpolated": {
+      "foreground": "#ce9178"
+    },
+    "string.regex": {
+      "foreground": "#d16969"
+    },
+    "string.escape": {
+      "foreground": "#d16969"
+    },
+    "string.special": {
+      "foreground": "#d16969"
+    }
+  }
+}
