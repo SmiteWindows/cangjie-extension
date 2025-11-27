@@ -7,3 +7,4 @@ tree-sitter-cangjie.wasm
 .arts
 .cache
 .zed
+grammars/cangjie/
