@@ -9,43 +9,10 @@ module.exports = grammar({
   ],
   conflicts: $ => [
     [$.range_expression],
-    [$.member_access_expression, $.range_expression],
     [$.range_expression, $.type_cast_expression],
     [$.range_expression, $.type_test_expression],
-    [$.range_expression, $.coalescing_expression],
-    [$.range_expression, $.flow_expression],
-    [$.range_expression, $.assignment_expression],
-    [$.coalescing_expression],
-    [$.coalescing_expression, $.flow_expression],
-    [$.flow_expression],
-    [$.member_access_expression, $.flow_expression],
-    [$.flow_expression, $.type_cast_expression],
-    [$.flow_expression, $.type_test_expression],
-    [$.call_expression, $.flow_expression],
-    [$.index_access_expression, $.flow_expression],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.flow_expression],
-    [$.member_access_expression, $.coalescing_expression],
-    [$.member_access_expression, $.assignment_expression],
-    [$.assignment_expression, $.type_cast_expression],
-    [$.assignment_expression, $.type_test_expression],
-    [$.assignment_expression, $.coalescing_expression],
-    [$.assignment_expression, $.flow_expression],
-    [$.call_expression, $.assignment_expression],
-    [$.index_access_expression, $.assignment_expression],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.assignment_expression],
-    [$.coalescing_expression, $.type_cast_expression],
-    [$.coalescing_expression, $.type_test_expression],
-    [$.call_expression, $.coalescing_expression],
-    [$.index_access_expression, $.coalescing_expression],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.coalescing_expression],
-    [$.call_expression, $.range_expression],
-    [$.index_access_expression, $.range_expression],
-    [$.member_access_expression, $.call_expression, $.index_access_expression, $.range_expression],
-
-    [$.variable_declaration, $.member_access_expression],
-    [$.variable_declaration, $.call_expression],
-    [$.variable_declaration, $.index_access_expression],
-    [$.variable_declaration, $.member_access_expression, $.call_expression, $.index_access_expression],
+    [$.range_expression, $.control_transfer_expression],
+    [$.range_expression, $.address_of_expression],
     [$.lambda_expression, $.macro_block_argument],
     [$.struct_constant_expression, $.type],
     [$.super_class_or_interfaces],
@@ -71,13 +38,9 @@ module.exports = grammar({
     [$.type_identifier, $.binding_pattern, $.enum_pattern, $.left_value_expression],
     [$.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression, $.left_value_expression],
     [$.multi_line_raw_string_literal],
-
-
-
     [$.foreign_function_declaration, $.function_modifier],
     [$.foreign_type_declaration, $.class_modifier],
     [$.foreign_type_declaration, $.struct_modifier],
-
     [$.binding_pattern, $.enum_pattern],
     [$.constant_declaration, $.binding_pattern, $.enum_pattern],
     [$.literal, $.constant_literal],
@@ -106,7 +69,6 @@ module.exports = grammar({
     [$.line_string_interpolation, $.member_access_expression, $.call_expression, $.index_access_expression],
     [$.left_value_expression, $._expression],
     [$.variable_declaration, $.annotation],
-
     [$.type_parameter],
     [$.function_modifier, $.static_function_declaration],
     [$.unary_constant_expression, $.binary_constant_expression],
@@ -171,9 +133,12 @@ module.exports = grammar({
     [$.constant_if_expression, $.range_constant_expression],
     [$.constant_expression, $.constant_if_expression],
     [$.constant_identifier, $.type_identifier, $.binding_pattern, $.enum_pattern],
-
     [$.unary_expression, $._expression],
     [$.primary_expression, $.spawn_expression],
+    [$.type_identifier, $.lambda_parameter],
+    [$.assignment_expression, $.type_cast_expression],
+    [$.assignment_expression, $.range_expression],
+    [$.assignment_expression, $.type_test_expression],
     ],
   word: $ => $.identifier,
 
@@ -669,11 +634,10 @@ module.exports = grammar({
     ),
 
     // 4. 表达式（Expressions）
+    // 主表达式入口 - 所有表达式最终解析为这个规则
     expression: $ => choice(
-      // 优先级表达式链
-      $._expression,
-      $.range_expression,
       $.assignment_expression,
+      $.range_expression,
       // 控制流表达式
       $.if_expression,
       $.if_let_expression,
@@ -797,96 +761,61 @@ module.exports = grammar({
     ),
     
     // 表达式优先级层级（从高到低）
-    expression: $ => $.assignment_expression,
-    
-    // 16. 赋值表达式（最低优先级，右结合）
-    assignment_expression: $ => choice(
-      prec.right(1, seq(
-        $.flow_expression,
-        choice('=', '**=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=', '&&=', '||='),
-        $.assignment_expression
-      )),
-      $.flow_expression
+    // 1. 基础表达式（最高优先级）
+    primary_expression: $ => choice(
+      $.literal,
+      $.identifier_expression,
+      $.parenthesized_expression,
+      $.member_access_expression,
+      $.call_expression,
+      $.index_access_expression,
+      $.lambda_expression
     ),
     
-    // 15. 流表达式（left associative）
-    flow_expression: $ => choice(
-      prec.left(2, seq(
-        $.coalescing_expression,
-        choice('|>', '~>'),
-        $.flow_expression
-      )),
-      $.coalescing_expression
+    // 2. 一元表达式
+    unary_expression: $ => choice(
+      seq(choice('!', '-', '++', '--'), $.primary_expression),
+      $.primary_expression
     ),
     
-    // 14. 空合并表达式（left associative）
-    coalescing_expression: $ => choice(
-      prec.left(3, seq(
-        $.logical_or_expression,
-        '??',
-        $.coalescing_expression
+    // 3. 幂运算表达式（right associative）
+    exponentiation_expression: $ => choice(
+      prec.right(14, seq(
+        $.unary_expression,
+        '**',
+        $.exponentiation_expression
       )),
-      $.logical_or_expression
+      $.unary_expression
     ),
     
-    // 13. 逻辑或表达式（left associative）
-    logical_or_expression: $ => choice(
-      prec.left(4, seq(
-        $.logical_and_expression,
-        '||',
-        $.logical_or_expression
+    // 4. 乘法表达式（left associative）
+    multiplicative_expression: $ => choice(
+      prec.left(13, seq(
+        $.exponentiation_expression,
+        choice('*', '/', '%'),
+        $.multiplicative_expression
       )),
-      $.logical_and_expression
+      $.exponentiation_expression
     ),
     
-    // 12. 逻辑与表达式（left associative）
-    logical_and_expression: $ => choice(
-      prec.left(5, seq(
-        $.bitwise_or_expression,
-        '&&',
-        $.logical_and_expression
+    // 5. 加法表达式（left associative）
+    additive_expression: $ => choice(
+      prec.left(12, seq(
+        $.multiplicative_expression,
+        choice('+', '-'),
+        $.additive_expression
       )),
-      $.bitwise_or_expression
+      $.multiplicative_expression
     ),
     
-    // 11. 位或表达式（left associative）
-    bitwise_or_expression: $ => choice(
-      prec.left(6, seq(
-        $.bitwise_xor_expression,
-        '|',
-        $.bitwise_or_expression
+    // 6. 位移表达式（left associative）
+    bitwise_shift_expression: $ => choice(
+      prec.left(11, seq(
+        $.additive_expression,
+        choice('<<', '>>'),
+        $.bitwise_shift_expression
       )),
-      $.bitwise_xor_expression
-    ),
-    
-    // 10. 位异或表达式（left associative）
-    bitwise_xor_expression: $ => choice(
-      prec.left(7, seq(
-        $.bitwise_and_expression,
-        '^',
-        $.bitwise_xor_expression
-      )),
-      $.bitwise_and_expression
-    ),
-    
-    // 9. 位与表达式（left associative）
-    bitwise_and_expression: $ => choice(
-      prec.left(8, seq(
-        $.equality_expression,
-        '&',
-        $.bitwise_and_expression
-      )),
-      $.equality_expression
-    ),
-    
-    // 8. 相等性表达式（non-associative）
-    equality_expression: $ => choice(
-      prec(9, seq(
-        $.relational_expression,
-        choice('==', '!='),
-        $.relational_expression
-      )),
-      $.relational_expression
+      $.additive_expression
     ),
     
     // 7. 关系表达式（non-associative）
@@ -904,48 +833,98 @@ module.exports = grammar({
       $.bitwise_shift_expression
     ),
     
-    // 6. 位移表达式（left associative）
-    bitwise_shift_expression: $ => choice(
-      prec.left(11, seq(
-        $.additive_expression,
-        choice('<<', '>>'),
-        $.bitwise_shift_expression
+    // 8. 相等性表达式（non-associative）
+    equality_expression: $ => choice(
+      prec(9, seq(
+        $.relational_expression,
+        choice('==', '!='),
+        $.relational_expression
       )),
-      $.additive_expression
+      $.relational_expression
     ),
     
-    // 5. 加法表达式（left associative）
-    additive_expression: $ => choice(
-      prec.left(12, seq(
-        $.multiplicative_expression,
-        choice('+', '-'),
-        $.additive_expression
+    // 9. 位与表达式（left associative）
+    bitwise_and_expression: $ => choice(
+      prec.left(8, seq(
+        $.equality_expression,
+        '&',
+        $.bitwise_and_expression
       )),
-      $.multiplicative_expression
+      $.equality_expression
     ),
     
-    // 4. 乘法表达式（left associative）
-    multiplicative_expression: $ => choice(
-      prec.left(13, seq(
-        $.exponentiation_expression,
-        choice('*', '/', '%'),
-        $.multiplicative_expression
+    // 10. 位异或表达式（left associative）
+    bitwise_xor_expression: $ => choice(
+      prec.left(7, seq(
+        $.bitwise_and_expression,
+        '^',
+        $.bitwise_xor_expression
       )),
-      $.exponentiation_expression
+      $.bitwise_and_expression
     ),
     
-    // 3. 幂运算表达式（right associative）
-    exponentiation_expression: $ => choice(
-      prec.right(14, seq(
-        $.unary_expression,
-        '**',
-        $.exponentiation_expression
+    // 11. 位或表达式（left associative）
+    bitwise_or_expression: $ => choice(
+      prec.left(6, seq(
+        $.bitwise_xor_expression,
+        '|',
+        $.bitwise_or_expression
       )),
-      $.unary_expression
+      $.bitwise_xor_expression
+    ),
+    
+    // 12. 逻辑与表达式（left associative）
+    logical_and_expression: $ => choice(
+      prec.left(5, seq(
+        $.bitwise_or_expression,
+        '&&',
+        $.logical_and_expression
+      )),
+      $.bitwise_or_expression
+    ),
+    
+    // 13. 逻辑或表达式（left associative）
+    logical_or_expression: $ => choice(
+      prec.left(4, seq(
+        $.logical_and_expression,
+        '||',
+        $.logical_or_expression
+      )),
+      $.logical_and_expression
+    ),
+    
+    // 14. 空合并表达式（left associative）
+    coalescing_expression: $ => choice(
+      prec.left(3, seq(
+        $.logical_or_expression,
+        '??',
+        $.coalescing_expression
+      )),
+      $.logical_or_expression
+    ),
+    
+    // 15. 流表达式（left associative）
+    flow_expression: $ => choice(
+      prec.left(2, seq(
+        $.coalescing_expression,
+        choice('|>', '~>'),
+        $.flow_expression
+      )),
+      $.coalescing_expression
+    ),
+    
+    // 16. 赋值表达式（最低优先级，右结合）
+    assignment_expression: $ => choice(
+      prec.right(1, seq(
+        $.flow_expression,
+        choice('=', '**=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=', '&&=', '||='),
+        $.assignment_expression
+      )),
+      $.flow_expression
     ),
     
     // 表达式别名用于 backward compatibility
-    _expression: $ => $.expression,
+    _expression: $ => $.primary_expression,
 
     // 范围表达式（start..end:step 或 start..=end:step）
     range_expression: $ => seq(
