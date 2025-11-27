@@ -88,10 +88,6 @@
           "named": true
         },
         {
-          "type": "annotation_modifier",
-          "named": true
-        },
-        {
           "type": "annotation_parameters",
           "named": true
         },
@@ -101,6 +97,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "modifier",
           "named": true
         },
         {
@@ -128,11 +128,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "annotation_modifier",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "annotation_parameter",
@@ -468,15 +463,15 @@
           "named": true
         },
         {
-          "type": "class_modifier",
-          "named": true
-        },
-        {
           "type": "generic_constraints",
           "named": true
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "modifier",
           "named": true
         },
         {
@@ -511,18 +506,22 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
-        {
-          "type": "class_member_modifier",
-          "named": true
-        },
         {
           "type": "expression_or_declaration",
           "named": true
         },
         {
           "type": "function_parameters",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "modifier",
           "named": true
         },
         {
@@ -538,11 +537,6 @@
   },
   {
     "type": "class_member_modifier",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "class_modifier",
     "named": true,
     "fields": {}
   },
@@ -1026,15 +1020,15 @@
           "named": true
         },
         {
-          "type": "enum_modifier",
-          "named": true
-        },
-        {
           "type": "generic_constraints",
           "named": true
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "modifier",
           "named": true
         },
         {
@@ -1074,11 +1068,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "enum_modifier",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "enum_pattern",
@@ -1417,10 +1406,6 @@
           "named": true
         },
         {
-          "type": "function_modifier",
-          "named": true
-        },
-        {
           "type": "function_parameters",
           "named": true
         },
@@ -1433,6 +1418,10 @@
           "named": true
         },
         {
+          "type": "modifier",
+          "named": true
+        },
+        {
           "type": "type",
           "named": true
         },
@@ -1442,11 +1431,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "function_modifier",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "function_parameter",
@@ -1767,7 +1751,7 @@
           "named": true
         },
         {
-          "type": "interface_modifier",
+          "type": "modifier",
           "named": true
         },
         {
@@ -1780,11 +1764,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "interface_modifier",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "lambda_expression",
@@ -1895,6 +1874,10 @@
         },
         {
           "type": "integer_literal",
+          "named": true
+        },
+        {
+          "type": "none_literal",
           "named": true
         },
         {
@@ -2025,7 +2008,7 @@
           "named": true
         },
         {
-          "type": "macro_modifier",
+          "type": "modifier",
           "named": true
         },
         {
@@ -2063,9 +2046,27 @@
     }
   },
   {
-    "type": "macro_modifier",
+    "type": "main_function_declaration",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "function_parameters",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "member_access_expression",
@@ -2089,6 +2090,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "modifier",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "multi_line_raw_string_literal",
@@ -2209,15 +2215,15 @@
           "named": true
         },
         {
-          "type": "function_modifier",
-          "named": true
-        },
-        {
           "type": "function_parameters",
           "named": true
         },
         {
           "type": "generic_constraints",
+          "named": true
+        },
+        {
+          "type": "modifier",
           "named": true
         },
         {
@@ -2444,11 +2450,11 @@
           "named": true
         },
         {
-          "type": "property_body",
+          "type": "modifier",
           "named": true
         },
         {
-          "type": "property_modifier",
+          "type": "property_body",
           "named": true
         },
         {
@@ -2480,11 +2486,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "property_modifier",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "range_constant_expression",
@@ -2707,11 +2708,11 @@
           "named": true
         },
         {
-          "type": "struct_body",
+          "type": "modifier",
           "named": true
         },
         {
-          "type": "struct_modifier",
+          "type": "struct_body",
           "named": true
         },
         {
@@ -2792,11 +2793,6 @@
   },
   {
     "type": "struct_member_modifier",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "struct_modifier",
     "named": true,
     "fields": {}
   },
@@ -2899,6 +2895,10 @@
         {
           "type": "expression",
           "named": true
+        },
+        {
+          "type": "named_argument",
+          "named": true
         }
       ]
     }
@@ -2951,6 +2951,10 @@
         },
         {
           "type": "import_declaration",
+          "named": true
+        },
+        {
+          "type": "main_function_declaration",
           "named": true
         },
         {
@@ -3073,11 +3077,11 @@
           "named": true
         },
         {
-          "type": "type",
+          "type": "modifier",
           "named": true
         },
         {
-          "type": "type_alias_modifier",
+          "type": "type",
           "named": true
         },
         {
@@ -3086,11 +3090,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "type_alias_modifier",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "type_arguments",
@@ -3256,24 +3255,19 @@
           "named": true
         },
         {
+          "type": "modifier",
+          "named": true
+        },
+        {
           "type": "pattern",
           "named": true
         },
         {
           "type": "type",
           "named": true
-        },
-        {
-          "type": "variable_modifier",
-          "named": true
         }
       ]
     }
-  },
-  {
-    "type": "variable_modifier",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "varray_type",
@@ -3668,10 +3662,6 @@
     "named": false
   },
   {
-    "type": "abstract",
-    "named": false
-  },
-  {
     "type": "annotation",
     "named": false
   },
@@ -3832,6 +3822,10 @@
     "named": false
   },
   {
+    "type": "main",
+    "named": false
+  },
+  {
     "type": "multi_line_string_content",
     "named": true
   },
@@ -3842,6 +3836,10 @@
   {
     "type": "n",
     "named": false
+  },
+  {
+    "type": "none_literal",
+    "named": true
   },
   {
     "type": "octal_digit",
@@ -3889,10 +3887,6 @@
   },
   {
     "type": "redef",
-    "named": false
-  },
-  {
-    "type": "sealed",
     "named": false
   },
   {

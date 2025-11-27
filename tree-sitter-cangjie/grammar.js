@@ -38,9 +38,6 @@ module.exports = grammar({
     [$.type_identifier, $.binding_pattern, $.enum_pattern, $.left_value_expression],
     [$.type_identifier, $.binding_pattern, $.enum_pattern, $.identifier_expression, $.left_value_expression],
     [$.multi_line_raw_string_literal],
-    [$.foreign_function_declaration, $.function_modifier],
-    [$.foreign_type_declaration, $.class_modifier],
-    [$.foreign_type_declaration, $.struct_modifier],
     [$.binding_pattern, $.enum_pattern],
     [$.constant_declaration, $.binding_pattern, $.enum_pattern],
     [$.literal, $.constant_literal],
@@ -70,7 +67,12 @@ module.exports = grammar({
     [$.left_value_expression, $._expression],
     [$.variable_declaration, $.annotation],
     [$.type_parameter],
-    [$.function_modifier, $.static_function_declaration],
+    [$.foreign_function_declaration, $.modifier],
+    [$.foreign_type_declaration, $.modifier],
+    [$.modifier, $.static_function_declaration],
+    [$.modifier, $.class_member_modifier],
+    [$.modifier, $.static_init],
+    [$.function_parameters, $.class_primary_init],
     [$.unary_constant_expression, $.binary_constant_expression],
     [$.unary_constant_expression, $.range_constant_expression],
     [$.range_constant_expression, $.binary_constant_expression],
@@ -143,6 +145,7 @@ module.exports = grammar({
     [$.constant_if_expression, $.parenthesized_constant_expression, $.tuple_constant_expression],
     [$.constant_pattern, $.primary_expression],
     [$.constant_identifier, $.type_identifier, $.identifier_expression],
+    [$.class_primary_init, $.class_init],
     ],
   word: $ => $.identifier,
 
@@ -154,7 +157,16 @@ module.exports = grammar({
       $.package_declaration,
       $.import_declaration,
       $.export_declaration,
-      $.declaration
+      $.declaration,
+      $.main_function_declaration
+    ),
+    
+    // 特殊的main函数声明（不需要func关键字）
+    main_function_declaration: $ => seq(
+      'main',
+      $.function_parameters,
+      optional(seq(':', $.type)),
+      $.block
     ),
 
     // 11. 包与模块（Packages & Modules）
@@ -271,7 +283,9 @@ module.exports = grammar({
       $.unit_literal,
       $.nothing_literal,
       $.constant_literal,
+      $.none_literal
     ),
+    none_literal: $ => 'None',
 
     // 整数字面量（支持二进制、八进制、十进制、十六进制 + 后缀）
     integer_literal: $ => seq(
@@ -586,14 +600,11 @@ module.exports = grammar({
     // 3. 变量与作用域（Variables & Scope）
     variable_declaration: $ => seq(
       optional($.annotation),
-      optional($.variable_modifier),
+      repeat($.modifier),
       choice('let', 'var', 'const'),
       sep1($.pattern, ','),
       optional(seq(':', $.type)),
       optional(seq('=', $.expression))
-    ),
-    variable_modifier: $ => choice(
-      'public', 'private', 'protected', 'internal', 'static'
     ),
     pattern: $ => choice(
       $.wildcard_pattern,
@@ -1168,7 +1179,7 @@ module.exports = grammar({
     // 17. 注解（Annotation）细节
     // 注解声明（带参数）
     annotation_declaration: $ => seq(
-      optional($.annotation_modifier),
+      repeat($.modifier),
       'annotation',
       $.identifier,
       optional($.type_parameters),
@@ -1176,7 +1187,6 @@ module.exports = grammar({
       optional($.generic_constraints),
       optional($.annotation_body)
     ),
-    annotation_modifier: $ => choice('public', 'private', 'internal'),
     annotation_parameters: $ => seq(
       '(',
       optional(sep1($.annotation_parameter, ',')),
@@ -1257,7 +1267,7 @@ module.exports = grammar({
     // 5. 函数（Functions）
     function_declaration: $ => seq(
       optional($.annotation),
-      optional($.function_modifier),
+      repeat($.modifier),
       'func',
       $.identifier,
       optional($.type_parameters),
@@ -1266,7 +1276,8 @@ module.exports = grammar({
       optional($.generic_constraints),
       $.block
     ),
-    function_modifier: $ => choice(
+    // 通用修饰符规则
+    modifier: $ => choice(
       'public', 'private', 'protected', 'internal',
       'static', 'open', 'override', 'redef', 'mut', 'foreign', 'unsafe'
     ),
@@ -1342,17 +1353,13 @@ module.exports = grammar({
     // 6.1 类声明
     class_declaration: $ => seq(
       optional($.annotation),
-      optional($.class_modifier),
+      repeat($.modifier),
       'class',
       $.identifier,
       optional($.type_parameters),
       optional(seq('<:', $.super_class_or_interfaces)),
       optional($.generic_constraints),
       $.class_body
-    ),
-    class_modifier: $ => choice(
-      'public', 'private', 'protected', 'internal',
-      'open', 'sealed', 'abstract', 'foreign', 'unsafe'
     ),
     super_class_or_interfaces: $ => choice(
       seq($.type, optional(seq('&', sep1($.type, '&')))),
@@ -1417,14 +1424,12 @@ module.exports = grammar({
       )
     ),
     class_member_modifier: $ => choice('public', 'private', 'protected', 'internal'),
-    super_call: $ => seq('super', '(', optional(sep1($.expression, ',')), ')'),
-    // 类构造函数（init）
+    super_call: $ => seq('super', '(', optional(sep1(choice($.expression, $.named_argument), ',')), ')'),
+    // 类构造函数（init或类名）
     class_init: $ => seq(
-      optional($.class_member_modifier),
-      'init',
-      '(',
-      optional($.function_parameters),
-      ')',
+      repeat($.modifier),
+      choice('init', $.identifier),
+      $.function_parameters,
       '{',
       optional(choice($.super_call, $.this_call)),
       repeat($.expression_or_declaration),
@@ -1453,7 +1458,7 @@ module.exports = grammar({
     // 6.2 接口声明
     interface_declaration: $ => seq(
       optional($.annotation),
-      optional($.interface_modifier),
+      repeat($.modifier),
       'interface',
       $.identifier,
       optional($.type_parameters),
@@ -1461,7 +1466,6 @@ module.exports = grammar({
       optional($.generic_constraints),
       $.interface_body
     ),
-    interface_modifier: $ => choice('public', 'sealed', 'open'),
     interface_body: $ => seq(
       '{',
       repeat(choice(
@@ -1481,7 +1485,7 @@ module.exports = grammar({
     // 7. 结构体（Structs）
     struct_declaration: $ => seq(
       optional($.annotation),
-      optional($.struct_modifier),
+      repeat($.modifier),
       'struct',
       $.identifier,
       optional($.type_parameters),
@@ -1489,7 +1493,6 @@ module.exports = grammar({
       optional($.generic_constraints),
       $.struct_body
     ),
-    struct_modifier: $ => choice('public', 'private', 'internal', 'foreign', 'unsafe'),
     struct_body: $ => seq(
       '{',
       repeat(choice(
@@ -1560,7 +1563,7 @@ module.exports = grammar({
     // 8. 枚举（Enums）
     enum_declaration: $ => seq(
       optional($.annotation),
-      optional($.enum_modifier),
+      repeat($.modifier),
       'enum',
       $.identifier,
       optional($.type_parameters),
@@ -1568,7 +1571,6 @@ module.exports = grammar({
       optional($.generic_constraints),
       $.enum_body
     ),
-    enum_modifier: $ => choice('public', 'private', 'internal'),
     enum_body: $ => seq(
       '{',
       optional('|'),
@@ -1591,16 +1593,12 @@ module.exports = grammar({
     // 9. 属性（Properties）
     property_declaration: $ => seq(
       optional($.annotation),
-      optional($.property_modifier),
+      repeat($.modifier),
       'prop',
       $.identifier,
       ':',
       $.type,
       optional($.property_body)
-    ),
-    property_modifier: $ => choice(
-      'public', 'private', 'protected', 'internal',
-      'static', 'open', 'override', 'redef', 'mut'
     ),
     property_body: $ => seq(
       '{',
@@ -1637,19 +1635,18 @@ module.exports = grammar({
     // 11. 类型别名（Type Aliases）
     type_alias_declaration: $ => seq(
       optional($.annotation),
-      optional($.type_alias_modifier),
+      repeat($.modifier),
       'type',
       $.identifier,
       optional($.type_parameters),
       '=',
       $.type
     ),
-    type_alias_modifier: $ => choice('public', 'private', 'internal'),
 
     // 12. 操作符重载（Operator Overloading）
     operator_declaration: $ => seq(
       optional($.annotation),
-      optional($.function_modifier),
+      optional($.modifier),
       'operator',
       $.operator,
       $.function_parameters,
@@ -1675,7 +1672,7 @@ module.exports = grammar({
     // 13. 宏（Macros）
     macro_declaration: $ => seq(
       optional($.annotation),
-      optional($.macro_modifier),
+      repeat($.modifier),
       'macro',
       $.identifier,
       optional($.type_parameters),
@@ -1684,7 +1681,6 @@ module.exports = grammar({
       optional($.generic_constraints),
       $.block
     ),
-    macro_modifier: $ => choice('public', 'private', 'internal'),
     // 宏调用（带参数展开）
     macro_invocation: $ => seq(
       '@',
