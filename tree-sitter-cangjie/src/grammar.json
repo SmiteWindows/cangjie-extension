@@ -1761,8 +1761,17 @@
           "value": "="
         },
         {
-          "type": "SYMBOL",
-          "name": "constant_expression"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "constant_if_expression"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "constant_expression"
+            }
+          ]
         }
       ]
     },
@@ -1852,6 +1861,10 @@
         }
       ]
     },
+    "_constant_expression": {
+      "type": "SYMBOL",
+      "name": "constant_expression"
+    },
     "constant_type_cast": {
       "type": "SEQ",
       "members": [
@@ -1881,16 +1894,30 @@
           "value": "if"
         },
         {
-          "type": "STRING",
-          "value": "("
-        },
-        {
-          "type": "SYMBOL",
-          "name": "constant_expression"
-        },
-        {
-          "type": "STRING",
-          "value": ")"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "("
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "constant_expression"
+                },
+                {
+                  "type": "STRING",
+                  "value": ")"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "constant_expression"
+            }
+          ]
         },
         {
           "type": "STRING",
@@ -9273,6 +9300,15 @@
     [
       "expression",
       "assignment_expression"
+    ],
+    [
+      "constant_declaration",
+      "constant_expression"
+    ],
+    [
+      "constant_if_expression",
+      "parenthesized_constant_expression",
+      "tuple_constant_expression"
     ],
     [
       "constant_identifier",

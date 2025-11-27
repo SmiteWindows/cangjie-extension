@@ -157,7 +157,7 @@ enum Case {
 }
 
 // Constant evaluation
-const COMPILE_TIME_CONST = if 1 > 0 {
+const COMPILE_TIME_CONST = if (1 > 0) {
   42
 } else {
   0

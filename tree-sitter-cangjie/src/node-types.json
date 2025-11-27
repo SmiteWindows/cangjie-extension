@@ -751,6 +751,10 @@
           "named": true
         },
         {
+          "type": "constant_if_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },

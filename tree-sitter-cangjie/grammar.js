@@ -27,6 +27,8 @@ module.exports = grammar({
     [$.expression, $.coalescing_expression],
     [$.expression, $.flow_expression],
     [$.expression, $.assignment_expression],
+    [$.constant_declaration, $.constant_expression],
+    [$.constant_if_expression, $.parenthesized_constant_expression, $.tuple_constant_expression],
     [$.constant_identifier, $.type_identifier, $.identifier_expression],
     [$.constant_pattern, $.primary_expression],
     [$.range_expression],
@@ -415,7 +417,10 @@ module.exports = grammar({
       $.identifier,
       optional(seq(':', $.type)),
       '=',
-      $.constant_expression
+      choice(
+        $.constant_if_expression,
+        $.constant_expression
+      )
     ),
     constant_literal: $ => choice(
       $.integer_literal,
@@ -441,13 +446,16 @@ module.exports = grammar({
       $.constant_type_cast,
       $.constant_if_expression
     ),
+    // 确保if表达式能被正确识别为常量表达式
+    _constant_expression: $ => $.constant_expression,
     constant_type_cast: $ => seq($.type, '(', $.constant_expression, ')'),
     // 常量条件表达式（编译期分支消除）
     constant_if_expression: $ => seq(
       'if',
-      '(',
-      $.constant_expression,
-      ')',
+      choice(
+        seq('(', $.constant_expression, ')'),
+        $.constant_expression
+      ),
       '{',
       $.constant_expression,
       '}',
