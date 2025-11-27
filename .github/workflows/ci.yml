@@ -21,6 +21,32 @@ jobs:
       with:
         node-version: '18'
 
+    - name: Install Cangjie SDK
+      run: |
+        echo "Installing Cangjie SDK..."
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          # Linux installation
+          wget -q https://cangjie-lang.cn/download/1.0.4 -O cangjie-sdk.tar.gz
+          mkdir -p /usr/local/cangjie
+          tar -xzf cangjie-sdk.tar.gz -C /usr/local/cangjie --strip-components=1
+          echo "CANGJIE_HOME=/usr/local/cangjie" >> $GITHUB_ENV
+          echo "/usr/local/cangjie/bin" >> $GITHUB_PATH
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          # macOS installation
+          curl -s -L https://cangjie-lang.cn/download/1.0.4 -o cangjie-sdk.tar.gz
+          mkdir -p /usr/local/cangjie
+          tar -xzf cangjie-sdk.tar.gz -C /usr/local/cangjie --strip-components=1
+          echo "CANGJIE_HOME=/usr/local/cangjie" >> $GITHUB_ENV
+          echo "/usr/local/cangjie/bin" >> $GITHUB_PATH
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+          # Windows installation
+          Invoke-WebRequest -Uri "https://cangjie-lang.cn/download/1.0.4" -OutFile "cangjie-sdk.zip"
+          Expand-Archive -Path "cangjie-sdk.zip" -DestinationPath "C:\Program Files\Cangjie" -Force
+          echo "CANGJIE_HOME=C:\Program Files\Cangjie" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "C:\Program Files\Cangjie\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+        fi
+      shell: ${{ runner.os == 'Windows' ? 'pwsh' : 'bash' }}
+
     - name: Install dependencies
       run: npm install
 
