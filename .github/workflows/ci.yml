@@ -15,6 +15,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -23,29 +26,32 @@ jobs:
 
     - name: Install Cangjie SDK
       run: |
-        echo "Installing Cangjie SDK..."
-        if [ "$RUNNER_OS" == "Linux" ]; then
+        Write-Host "Installing Cangjie SDK..."
+        
+        $sdkUrl = "https://cangjie-lang.cn/download/1.0.4"
+        
+        if ($env:RUNNER_OS -eq "Linux") {
           # Linux installation
-          wget -q https://cangjie-lang.cn/download/1.0.4 -O cangjie-sdk.tar.gz
+          wget -q $sdkUrl -O cangjie-sdk.tar.gz
           mkdir -p /usr/local/cangjie
           tar -xzf cangjie-sdk.tar.gz -C /usr/local/cangjie --strip-components=1
-          echo "CANGJIE_HOME=/usr/local/cangjie" >> $GITHUB_ENV
-          echo "/usr/local/cangjie/bin" >> $GITHUB_PATH
-        elif [ "$RUNNER_OS" == "macOS" ]; then
+          "CANGJIE_HOME=/usr/local/cangjie" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "/usr/local/cangjie/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+        } elseif ($env:RUNNER_OS -eq "macOS") {
           # macOS installation
-          curl -s -L https://cangjie-lang.cn/download/1.0.4 -o cangjie-sdk.tar.gz
+          curl -s -L $sdkUrl -o cangjie-sdk.tar.gz
           mkdir -p /usr/local/cangjie
           tar -xzf cangjie-sdk.tar.gz -C /usr/local/cangjie --strip-components=1
-          echo "CANGJIE_HOME=/usr/local/cangjie" >> $GITHUB_ENV
-          echo "/usr/local/cangjie/bin" >> $GITHUB_PATH
-        elif [ "$RUNNER_OS" == "Windows" ]; then
+          "CANGJIE_HOME=/usr/local/cangjie" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "/usr/local/cangjie/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+        } elseif ($env:RUNNER_OS -eq "Windows") {
           # Windows installation
-          Invoke-WebRequest -Uri "https://cangjie-lang.cn/download/1.0.4" -OutFile "cangjie-sdk.zip"
+          Invoke-WebRequest -Uri $sdkUrl -OutFile "cangjie-sdk.zip"
           Expand-Archive -Path "cangjie-sdk.zip" -DestinationPath "C:\Program Files\Cangjie" -Force
-          echo "CANGJIE_HOME=C:\Program Files\Cangjie" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "C:\Program Files\Cangjie\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-        fi
-      shell: ${{ runner.os == 'Windows' ? 'pwsh' : 'bash' }}
+          "CANGJIE_HOME=C:\Program Files\Cangjie" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "C:\Program Files\Cangjie\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+        }
+      shell: pwsh
 
     - name: Install dependencies
       run: npm install
@@ -64,6 +70,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
 
     - name: Set up Rust
       uses: dtolnay/rust-toolchain@master

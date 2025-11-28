@@ -8,7 +8,7 @@ This extension adds comprehensive support for the Cangjie programming language t
 ### Core Features
 * **Syntax Highlighting**: Advanced syntax highlighting powered by Tree-sitter grammar
 * **Language Server Protocol (LSP)**: Integration for code completion, diagnostics, go-to-definition, references, etc.
-* **Task Integration**: Build and run Cangjie projects using `cjpm` and `jc`
+* **Task Integration**: Build and run Cangjie projects using `cjpm` and `cjc`
 * **Debugging Support**: Debug Cangjie programs via `cjdb`
 * **Slash Commands**: Quick info with `/cangjie-info`
 

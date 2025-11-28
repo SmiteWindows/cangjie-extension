@@ -31,7 +31,9 @@ jobs:
       run: cd tree-sitter-cangjie && cargo build --release
 
     - name: Generate changelog
-      run: pwsh -ExecutionPolicy Bypass -File .\generate-changelog.ps1
+      run: |
+        .\generate-changelog.ps1
+      shell: pwsh
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -45,7 +47,8 @@ jobs:
 
     - name: Clean build artifacts
       run: |
-        rm -rf target/
-        rm -rf node_modules/
-        rm -rf tree-sitter-cangjie/target/
-        rm -rf tree-sitter-cangjie/node_modules/
+        Remove-Item -Path "target" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "node_modules" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "tree-sitter-cangjie/target" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "tree-sitter-cangjie/node_modules" -Recurse -Force -ErrorAction SilentlyContinue
+      shell: pwsh
