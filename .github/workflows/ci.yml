@@ -55,6 +55,9 @@ jobs:
         bash -c "tar -xzf $wasiSdkFile -C $tempDir"
         $wasiSdkDir = Get-ChildItem -Path $tempDir -Name "wasi-sdk-*" | Select-Object -First 1
         $wasiSdkPath = Join-Path -Path $tempDir -ChildPath $wasiSdkDir
+        
+        # Use project script to set WASI SDK path
+        .\setup-wasi-sdk.ps1 -WasiSdkPath $wasiSdkPath -Scope User
         echo "WASI_SDK_PATH=$wasiSdkPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       shell: pwsh
 
@@ -160,6 +163,9 @@ jobs:
         bash -c "tar -xzf $wasiSdkFile -C $tempDir"
         $wasiSdkDir = Get-ChildItem -Path $tempDir -Name "wasi-sdk-*" | Select-Object -First 1
         $wasiSdkPath = Join-Path -Path $tempDir -ChildPath $wasiSdkDir
+        
+        # Use project script to set WASI SDK path
+        .\setup-wasi-sdk.ps1 -WasiSdkPath $wasiSdkPath -Scope User
         echo "WASI_SDK_PATH=$wasiSdkPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       shell: pwsh
 
@@ -203,14 +209,15 @@ jobs:
 
     - name: Test WASM with Wasmtime
       run: |
-        # Verify wasmtime is installed
-        wasmtime --version
-        
-        # Check if WASM file exists
-        ls -la tree-sitter-cangjie/target/wasm32-wasip2/release/
-        
-        # Run basic validation of the WASM module
-        wasmtime validate tree-sitter-cangjie/target/wasm32-wasip2/release/tree_sitter_cangjie.wasm
+        # Use project script to test WASM module
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          # On Windows, use PowerShell
+          pwsh -ExecutionPolicy Bypass -File .\test-wasm-module.ps1 -InstallWasmtime
+        else
+          # On Linux/macOS, use bash to call PowerShell script
+          # Note: PowerShell 7 is required, which is pre-installed on GitHub runners
+          pwsh -ExecutionPolicy Bypass -File ./test-wasm-module.ps1 -InstallWasmtime
+        fi
       shell: bash
 
     - name: Run Go binding tests
@@ -236,115 +243,12 @@ jobs:
     - name: Install Cangjie SDK (Optional)
       continue-on-error: true
       run: |
-        Write-Host "Installing Cangjie SDK..."
-        
-        $sdkUrl = "https://cangjie-lang.cn/download/1.0.4"
-        # Use the correct temporary directory variable based on the OS
-        if ($env:RUNNER_OS -eq "Windows") {
-            $tempPath = $env:TEMP
-        } else {
-            if ([string]::IsNullOrEmpty($env:TMPDIR)) {
-                $tempPath = "/tmp"
-            } else {
-                $tempPath = $env:TMPDIR
-            }
-        }
-        $tempDir = Join-Path -Path $tempPath -ChildPath "cangjie-sdk-$(Get-Random)"
-        New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
-        
-        try {
-          if ($env:RUNNER_OS -eq "Linux") {
-            # Linux installation
-            Write-Host "Linux installation detected"
-            
-            # Check if required commands exist
-            if (-not (Get-Command wget -ErrorAction SilentlyContinue)) {
-              Write-Error "wget command not found, please install wget first"
-              exit 1
-            }
-            if (-not (Get-Command tar -ErrorAction SilentlyContinue)) {
-              Write-Error "tar command not found, please install tar first"
-              exit 1
-            }
-            
-            $sdkFile = Join-Path -Path $tempDir -ChildPath "cangjie-sdk.tar.gz"
-            Write-Host "Downloading SDK from $sdkUrl to $sdkFile"
-            wget -q $sdkUrl -O $sdkFile
-            
-            $installDir = "/usr/local/cangjie"
-            Write-Host "Creating installation directory: $installDir"
-            sudo mkdir -p $installDir
-            sudo chmod 755 $installDir
-            
-            Write-Host "Extracting SDK to $installDir"
-            sudo tar -xzf $sdkFile -C $installDir --strip-components=1
-            
-            Write-Host "Setting environment variables"
-            "CANGJIE_HOME=$installDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-            "$installDir/bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
-            
-            Write-Host "Linux SDK installation completed successfully"
-          } elseif ($env:RUNNER_OS -eq "macOS") {
-            # macOS installation
-            Write-Host "macOS installation detected"
-            
-            # Check if required commands exist
-            if (-not (Get-Command curl -ErrorAction SilentlyContinue)) {
-              Write-Error "curl command not found, please install curl first"
-              exit 1
-            }
-            if (-not (Get-Command tar -ErrorAction SilentlyContinue)) {
-              Write-Error "tar command not found, please install tar first"
-              exit 1
-            }
-            
-            $sdkFile = Join-Path -Path $tempDir -ChildPath "cangjie-sdk.tar.gz"
-            Write-Host "Downloading SDK from $sdkUrl to $sdkFile"
-            curl -s -L $sdkUrl -o $sdkFile
-            
-            $installDir = "/usr/local/cangjie"
-            Write-Host "Creating installation directory: $installDir"
-            sudo mkdir -p $installDir
-            sudo chmod 755 $installDir
-            
-            Write-Host "Extracting SDK to $installDir"
-            sudo tar -xzf $sdkFile -C $installDir --strip-components=1
-            
-            Write-Host "Setting environment variables"
-            "CANGJIE_HOME=$installDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-            "$installDir/bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
-            
-            Write-Host "macOS SDK installation completed successfully"
-          } elseif ($env:RUNNER_OS -eq "Windows") {
-            # Windows installation
-            Write-Host "Windows installation detected"
-            
-            $sdkFile = Join-Path -Path $tempDir -ChildPath "cangjie-sdk.zip"
-            Write-Host "Downloading SDK from $sdkUrl to $sdkFile"
-            Invoke-WebRequest -Uri $sdkUrl -OutFile $sdkFile -UseBasicParsing
-            
-            $installDir = "C:\Program Files\Cangjie"
-            Write-Host "Creating installation directory: $installDir"
-            New-Item -Path $installDir -ItemType Directory -Force | Out-Null
-            
-            Write-Host "Extracting SDK to $installDir"
-            Expand-Archive -Path $sdkFile -DestinationPath $installDir -Force
-            
-            Write-Host "Setting environment variables"
-            "CANGJIE_HOME=$installDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-            "$installDir\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
-            
-            Write-Host "Windows SDK installation completed successfully"
-          } else {
-            Write-Error "Unsupported operating system: $env:RUNNER_OS"
-            exit 1
-          }
-        } catch {
-          Write-Warning "SDK installation failed: $($_.Exception.Message)"
-          Write-Warning "SDK installation is optional, continuing with the build..."
-        } finally {
-          # Clean up temporary directory
-          Write-Host "Cleaning up temporary directory: $tempDir"
-          Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-        }
-      shell: pwsh
+        # Use project script to install Cangjie SDK
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          # On Windows, use PowerShell
+          pwsh -ExecutionPolicy Bypass -File .\setup-cangjie-sdk.ps1 -Force -Silent
+        else
+          # On Linux/macOS, use bash to call PowerShell script
+          pwsh -ExecutionPolicy Bypass -File ./setup-cangjie-sdk.ps1 -Force -Silent
+        fi
+      shell: bash
