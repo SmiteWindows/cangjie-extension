@@ -29,27 +29,103 @@ jobs:
         Write-Host "Installing Cangjie SDK..."
         
         $sdkUrl = "https://cangjie-lang.cn/download/1.0.4"
+        $tempDir = Join-Path -Path $env:TEMP -ChildPath "cangjie-sdk-$(Get-Random)"
+        New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         
-        if ($env:RUNNER_OS -eq "Linux") {
-          # Linux installation
-          wget -q $sdkUrl -O cangjie-sdk.tar.gz
-          mkdir -p /usr/local/cangjie
-          tar -xzf cangjie-sdk.tar.gz -C /usr/local/cangjie --strip-components=1
-          "CANGJIE_HOME=/usr/local/cangjie" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "/usr/local/cangjie/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-        } elseif ($env:RUNNER_OS -eq "macOS") {
-          # macOS installation
-          curl -s -L $sdkUrl -o cangjie-sdk.tar.gz
-          mkdir -p /usr/local/cangjie
-          tar -xzf cangjie-sdk.tar.gz -C /usr/local/cangjie --strip-components=1
-          "CANGJIE_HOME=/usr/local/cangjie" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "/usr/local/cangjie/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-        } elseif ($env:RUNNER_OS -eq "Windows") {
-          # Windows installation
-          Invoke-WebRequest -Uri $sdkUrl -OutFile "cangjie-sdk.zip"
-          Expand-Archive -Path "cangjie-sdk.zip" -DestinationPath "C:\Program Files\Cangjie" -Force
-          "CANGJIE_HOME=C:\Program Files\Cangjie" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "C:\Program Files\Cangjie\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+        try {
+          if ($env:RUNNER_OS -eq "Linux") {
+            # Linux installation
+            Write-Host "Linux installation detected"
+            
+            # Check if required commands exist
+            if (-not (Get-Command wget -ErrorAction SilentlyContinue)) {
+              Write-Error "wget command not found, please install wget first"
+              exit 1
+            }
+            if (-not (Get-Command tar -ErrorAction SilentlyContinue)) {
+              Write-Error "tar command not found, please install tar first"
+              exit 1
+            }
+            
+            $sdkFile = Join-Path -Path $tempDir -ChildPath "cangjie-sdk.tar.gz"
+            Write-Host "Downloading SDK from $sdkUrl to $sdkFile"
+            wget -q $sdkUrl -O $sdkFile
+            
+            $installDir = "/usr/local/cangjie"
+            Write-Host "Creating installation directory: $installDir"
+            sudo mkdir -p $installDir
+            sudo chmod 755 $installDir
+            
+            Write-Host "Extracting SDK to $installDir"
+            sudo tar -xzf $sdkFile -C $installDir --strip-components=1
+            
+            Write-Host "Setting environment variables"
+            "CANGJIE_HOME=$installDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            "$installDir/bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+            
+            Write-Host "Linux SDK installation completed successfully"
+          } elseif ($env:RUNNER_OS -eq "macOS") {
+            # macOS installation
+            Write-Host "macOS installation detected"
+            
+            # Check if required commands exist
+            if (-not (Get-Command curl -ErrorAction SilentlyContinue)) {
+              Write-Error "curl command not found, please install curl first"
+              exit 1
+            }
+            if (-not (Get-Command tar -ErrorAction SilentlyContinue)) {
+              Write-Error "tar command not found, please install tar first"
+              exit 1
+            }
+            
+            $sdkFile = Join-Path -Path $tempDir -ChildPath "cangjie-sdk.tar.gz"
+            Write-Host "Downloading SDK from $sdkUrl to $sdkFile"
+            curl -s -L $sdkUrl -o $sdkFile
+            
+            $installDir = "/usr/local/cangjie"
+            Write-Host "Creating installation directory: $installDir"
+            sudo mkdir -p $installDir
+            sudo chmod 755 $installDir
+            
+            Write-Host "Extracting SDK to $installDir"
+            sudo tar -xzf $sdkFile -C $installDir --strip-components=1
+            
+            Write-Host "Setting environment variables"
+            "CANGJIE_HOME=$installDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            "$installDir/bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+            
+            Write-Host "macOS SDK installation completed successfully"
+          } elseif ($env:RUNNER_OS -eq "Windows") {
+            # Windows installation
+            Write-Host "Windows installation detected"
+            
+            $sdkFile = Join-Path -Path $tempDir -ChildPath "cangjie-sdk.zip"
+            Write-Host "Downloading SDK from $sdkUrl to $sdkFile"
+            Invoke-WebRequest -Uri $sdkUrl -OutFile $sdkFile -UseBasicParsing
+            
+            $installDir = "C:\Program Files\Cangjie"
+            Write-Host "Creating installation directory: $installDir"
+            New-Item -Path $installDir -ItemType Directory -Force | Out-Null
+            
+            Write-Host "Extracting SDK to $installDir"
+            Expand-Archive -Path $sdkFile -DestinationPath $installDir -Force
+            
+            Write-Host "Setting environment variables"
+            "CANGJIE_HOME=$installDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            "$installDir\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+            
+            Write-Host "Windows SDK installation completed successfully"
+          } else {
+            Write-Error "Unsupported operating system: $env:RUNNER_OS"
+            exit 1
+          }
+        } catch {
+          Write-Error "SDK installation failed: $($_.Exception.Message)"
+          exit 1
+        } finally {
+          # Clean up temporary directory
+          Write-Host "Cleaning up temporary directory: $tempDir"
+          Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
         }
       shell: pwsh
 
