@@ -290,13 +290,13 @@ args = ["--stdio"]
 
 **作业**：
 1. **build**：构建扩展
-   - 安装 Cangjie SDK
    - 设置 Node.js
    - 设置 Rust
    - 安装 WASI SDK 29
    - 安装 Wasmtime
    - 构建 Tree-sitter 语法
    - 运行测试
+   - 安装 Cangjie SDK（可选）
 
 2. **test-bindings**：测试绑定
    - 安装依赖
