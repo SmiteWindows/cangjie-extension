@@ -134,6 +134,48 @@ function Configure-EnvironmentVariables {
     return $true
 }
 
+# Function to check if Cangjie SDK is already installed
+function Test-CangjieSdkInstalled {
+    param(
+        [string]$InstallPath
+    )
+    
+    Write-Host "🔍 Checking if Cangjie SDK is already installed at $InstallPath..."
+    
+    # Check if bin directory exists
+    $binPath = Join-Path -Path $InstallPath -ChildPath "bin"
+    if (-not (Test-Path -Path $binPath -PathType Container)) {
+        Write-Host "ℹ️  Cangjie SDK not found at $InstallPath" -ForegroundColor Cyan
+        return $false
+    }
+    
+    # Check if cjc compiler exists
+    $cjcPath = Join-Path -Path $binPath -ChildPath "cjc.exe"
+    if (-not (Test-Path -Path $cjcPath -PathType Leaf)) {
+        Write-Host "ℹ️  Cangjie SDK not found at $InstallPath (missing cjc.exe)" -ForegroundColor Cyan
+        return $false
+    }
+    
+    # Check if cjpm package manager exists
+    $cjpmPath = Join-Path -Path $binPath -ChildPath "cjpm.exe"
+    if (-not (Test-Path -Path $cjpmPath -PathType Leaf)) {
+        Write-Host "ℹ️  Cangjie SDK not found at $InstallPath (missing cjpm.exe)" -ForegroundColor Cyan
+        return $false
+    }
+    
+    # Test running cjc --version
+    try {
+        $cjcVersion = & $cjcPath --version 2>&1
+        Write-Host "✅ Cangjie SDK is already installed at $InstallPath" -ForegroundColor Green
+        Write-Host "   cjc version: $cjcVersion" -ForegroundColor Green
+    } catch {
+        Write-Host "ℹ️  Cangjie SDK files found but not functional: $($_.Exception.Message)" -ForegroundColor Cyan
+        return $false
+    }
+    
+    return $true
+}
+
 # Function to verify installation
 function Verify-Installation {
     param(
@@ -197,6 +239,20 @@ if (-not $NoAdminCheck -and -not (Test-Administrator)) {
     Write-Host "📝 Tip: Right-click PowerShell and select 'Run as administrator'." -ForegroundColor Yellow
     Write-Host "📝 Tip: Use -NoAdminCheck to skip this check (not recommended)." -ForegroundColor Yellow
     exit 1
+}
+
+# Check if Cangjie SDK is already installed
+if (Test-CangjieSdkInstalled -InstallPath $InstallPath) {
+    if (-not $Force) {
+        Write-Host ""
+        Write-Host "📝 Tip: Use -Force to reinstall or upgrade the SDK." -ForegroundColor Yellow
+        exit 0
+    } else {
+        Write-Host "⚠️  Reinstalling Cangjie SDK with -Force option..." -ForegroundColor Yellow
+        Write-Host ""
+    }
+} else {
+    Write-Host ""
 }
 
 # Create a temporary directory for the download
