@@ -19,6 +19,7 @@ Cangjie Extension 是为 Zed 编辑器提供的 Cangjie 编程语言支持扩展
 - Node.js 和 npm（用于构建脚本）
 - Rust 和 Cargo（用于编译 Rust 代码和 WASM）
 - Tree-sitter CLI（用于生成和构建语法解析器）
+- WASI SDK 29.0+（用于编译 WASM 模块）
 - Cangjie SDK 1.0.4+（用于开发和测试）
 
 ### 2.2 依赖安装
@@ -36,6 +37,43 @@ rustup target add wasm32-wasip2 wasm32-unknown-unknown
 #### 安装 Tree-sitter CLI
 ```bash
 npm install -g tree-sitter-cli
+```
+
+#### 安装 WASI SDK
+
+**Linux/macOS**：
+```bash
+# 下载并安装 WASI SDK 29.0
+curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-linux.tar.gz | tar -xzf - -C /opt
+
+# 设置 WASI_SDK_PATH 环境变量
+export WASI_SDK_PATH=/opt/wasi-sdk-29.0
+
+# 将环境变量添加到 shell 配置文件（可选，以便永久生效）
+echo "export WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> ~/.bashrc  # 或 ~/.zshrc
+```
+
+**Windows**（PowerShell）：
+```powershell
+# 下载 WASI SDK 29.0
+$wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-mingw.tar.gz"
+$tempDir = Join-Path -Path $env:TEMP -ChildPath "wasi-sdk"
+New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+$wasiSdkFile = Join-Path -Path $tempDir -ChildPath "wasi-sdk.tar.gz"
+Invoke-WebRequest -Uri $wasiSdkUrl -OutFile $wasiSdkFile -UseBasicParsing
+
+# 解压 WASI SDK（需要 Git Bash 或其他支持 tar 的工具）
+bash -c "tar -xzf $wasiSdkFile -C $tempDir"
+
+# 获取 WASI SDK 目录路径
+$wasiSdkDir = Get-ChildItem -Path $tempDir -Name "wasi-sdk-*" | Select-Object -First 1
+$wasiSdkPath = Join-Path -Path $tempDir -ChildPath $wasiSdkDir
+
+# 设置 WASI_SDK_PATH 环境变量
+[Environment]::SetEnvironmentVariable("WASI_SDK_PATH", $wasiSdkPath, "User")
+
+# 立即生效环境变量
+$env:WASI_SDK_PATH = $wasiSdkPath
 ```
 
 #### 安装 Cangjie SDK
@@ -226,18 +264,39 @@ npm run clean
 1. **WASI WASM**（用于服务器端）：
    - 目标：`wasm32-wasip2`
    - 输出路径：`tree-sitter-cangjie/target/wasm32-wasip2/release/tree_sitter_cangjie.wasm`
+   - 依赖：需要 WASI SDK 提供的编译器和系统头文件
 
 2. **Web WASM**（用于浏览器）：
    - 目标：`wasm32-unknown-unknown`
    - 输出路径：`tree-sitter-cangjie/target/wasm32-unknown-unknown/release/tree_sitter_cangjie.wasm`
+   - 依赖：不需要 WASI SDK，使用 Rust 自带的 WebAssembly 支持
 
-### 6.2 build-grammar.js 脚本
+### 6.2 WASI SDK 配置
+
+项目的 `build.rs` 文件已经配置为自动使用 WASI SDK 来编译 C 代码：
+
+1. **自动检测**：从环境变量 `WASI_SDK_PATH` 获取 WASI SDK 路径
+2. **默认路径**：如果未设置环境变量，将使用默认路径：
+   - Linux/macOS：`/opt/wasi-sdk-29.0`
+   - Windows：`C:/opt/wasi-sdk-29.0`
+3. **编译器配置**：使用 WASI SDK 的 clang 编译器来编译 C 代码
+4. **包含路径**：添加 WASI SDK 的系统头文件路径
+5. **目标设置**：明确指定目标为 `wasm32-wasip2`
+6. **WASI 特定标志**：
+   - `-nostdlib`：禁用标准库（使用 WASI 提供的库）
+   - `-fvisibility=hidden`：隐藏非导出符号，减小二进制大小
+   - `-fPIC`：生成位置无关代码，这是 WASM 所必需的
+
+### 6.3 build-grammar.js 脚本
 
 `scripts/build-grammar.js` 是核心构建脚本，支持以下功能：
 
 - 生成 Tree-sitter 解析器
 - 构建 Tree-sitter 解析器
-- 构建两种 WASM 目标
+- 构建两种 WASM 目标：
+  - WASI WASM：`cargo build --target wasm32-wasip2 --release`
+  - Web WASM：`cargo build --target wasm32-unknown-unknown --release`
+- 将 WASI WASM 复制到主目录
 - 支持 `--only-wasm` 选项，跳过 Tree-sitter 生成和构建步骤
 
 #### 使用示例
@@ -250,6 +309,21 @@ node scripts/build-grammar.js
 **仅构建 WASM**：
 ```bash
 node scripts/build-grammar.js --only-wasm
+```
+
+### 6.4 验证 WASM 模块
+
+构建完成后，可以使用 Wasmtime 来验证 WASM 模块：
+
+```bash
+# 验证 wasmtime 安装
+wasmtime --version
+
+# 检查 WASM 文件存在性
+ls -la tree-sitter-cangjie/target/wasm32-wasip2/release/
+
+# 验证 WASM 模块
+wasmtime validate tree-sitter-cangjie/target/wasm32-wasip2/release/tree_sitter_cangjie.wasm
 ```
 
 ## 7. 扩展配置选项
@@ -309,13 +383,38 @@ node scripts/build-grammar.js --only-wasm
 
 ### 9.1 WASM 构建失败
 
-**问题**：`fatal error: 'stdbool.h' file not found`
+#### 问题 1：`fatal error: 'stdbool.h' file not found`
 
 **解决方案**：确保安装了 WASI SDK 并正确设置了 `WASI_SDK_PATH` 环境变量：
 
+**Linux/macOS**：
 ```bash
 export WASI_SDK_PATH=/opt/wasi-sdk-29.0
 ```
+
+**Windows**（PowerShell）：
+```powershell
+$env:WASI_SDK_PATH = "C:/opt/wasi-sdk-29.0"  # 替换为实际路径
+```
+
+#### 问题 2：`clang: command not found`
+
+**解决方案**：确保 WASI SDK 已正确安装，且 `WASI_SDK_PATH` 环境变量指向正确的目录。
+
+#### 问题 3：`error: linker `rust-lld` not found`
+
+**解决方案**：确保 Rust 已安装并更新到最新版本：
+```bash
+rustup update
+```
+
+#### 问题 4：`error: failed to run custom build command for `tree-sitter-cangjie v0.1.2``
+
+**解决方案**：检查构建日志中的详细错误信息，通常是由于 C 代码编译失败导致的。确保：
+1. WASI SDK 已正确安装
+2. `WASI_SDK_PATH` 环境变量已正确设置
+3. C 代码没有语法错误
+4. Tree-sitter 解析器已正确生成
 
 ### 9.2 Tree-sitter 生成失败
 
@@ -335,6 +434,15 @@ npm install -g tree-sitter-cli
 1. 更新依赖：`cargo update`
 2. 检查代码错误：`cargo check`
 3. 运行单个测试：`cargo test <test-name>`
+
+### 9.4 WASM 模块验证失败
+
+**问题**：`wasmtime validate: error: invalid module`
+
+**解决方案**：
+1. 确保 WASM 模块是使用正确的目标构建的：`wasm32-wasip2`
+2. 检查构建日志中的错误信息
+3. 确保 WASI SDK 版本与项目要求的版本一致（29.0+）
 
 ## 10. 相关资源
 
