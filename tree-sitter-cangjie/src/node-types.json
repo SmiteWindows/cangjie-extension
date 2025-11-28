@@ -1604,6 +1604,21 @@
     }
   },
   {
+    "type": "postfix_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "primary_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "primary_expression",
     "named": true,
     "fields": {},
@@ -2287,7 +2302,7 @@
       "required": true,
       "types": [
         {
-          "type": "primary_expression",
+          "type": "postfix_expression",
           "named": true
         }
       ]

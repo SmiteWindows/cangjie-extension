@@ -514,10 +514,16 @@ module.exports = grammar({
       ')'
     ),
     
-    // 一元表达式
-    unary_expression: $ => choice(
-      seq(choice('!', '-', '++', '--'), $.primary_expression),
+    // 后缀表达式（支持 ++/-- 后缀，非结合）
+    postfix_expression: $ => choice(
+      seq($.primary_expression, choice('++', '--')),
       $.primary_expression
+    ),
+    
+    // 一元表达式（支持前缀 !, -）
+    unary_expression: $ => choice(
+      seq(choice('!', '-'), $.postfix_expression),
+      $.postfix_expression
     ),
     
     // 幂运算表达式（right associative）

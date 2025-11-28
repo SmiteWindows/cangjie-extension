@@ -11,12 +11,19 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
+# Rust dependency lock file
+Cargo.lock
+
 # Rust build artifacts
 **/*.rs.bk
 *.dll
 *.exp
 *.lib
 *.obj
+parser.exp
+parser.obj
+scanner.obj
+cangjie.dll
 
 # Generated parser files
 tree-sitter-cangjie/src/grammar.json
