@@ -20,6 +20,7 @@ const CONFIG_CJC_FRONTEND_PATH_KEY: &str = "cangjie.cjcFrontendPathOverride";
 const ENV_CANGJIE_HOME: &str = "CANGJIE_HOME";
 
 /// Error messages
+#[allow(dead_code)]
 const ERR_SDK_NOT_FOUND: &str = "Cangjie SDK not found. Please set the 'CANGJIE_HOME' environment variable, set 'cangjie.sdkPath' in your project settings, or place this extension within a standard Cangjie SDK structure.";
 const ERR_TOOL_NOT_FOUND_FMT: &str = "Tool '{}' not found in SDK or overridden path.";
 
@@ -443,6 +444,7 @@ impl CangjieExtension {
             Os::Mac => ("apple-darwin", ""),
             Os::Linux => ("unknown-linux-gnu", ""),
             Os::Windows => ("pc-windows-msvc", ".exe"),
+            #[allow(unreachable_patterns)]
             _ => return Err("Unsupported OS".into()),
         };
 
