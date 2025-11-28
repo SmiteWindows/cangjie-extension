@@ -19,9 +19,9 @@ class Build(build):
 class BuildExt(build_ext):
     def build_extension(self, ext: Extension):
         if self.compiler.compiler_type != "msvc":
-            ext.extra_compile_args = ["-std=c11", "-fvisibility=hidden"]
+            ext.extra_compile_args = ["-std=c17", "-fvisibility=hidden"]
         else:
-            ext.extra_compile_args = ["/std:c11", "/utf-8"]
+            ext.extra_compile_args = ["/std:c17", "/utf-8"]
         if path.exists("src/scanner.c"):
             ext.sources.append("src/scanner.c")
         if ext.py_limited_api:

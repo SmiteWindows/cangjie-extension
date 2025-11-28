@@ -41,7 +41,7 @@ target_compile_definitions(tree-sitter-yes PRIVATE
 
 set_target_properties(tree-sitter-yes
                       PROPERTIES
-                      C_STANDARD 11
+                      C_STANDARD 17
                       POSITION_INDEPENDENT_CODE ON
                       SOVERSION "${TREE_SITTER_ABI_VERSION}.${PROJECT_VERSION_MAJOR}"
                       DEFINE_SYMBOL "")
