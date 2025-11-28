@@ -7,7 +7,11 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}-${{ matrix.arch }}
+    strategy:
+      matrix:
+        os: [ubuntu, macos]
+        arch: [x64, arm64]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -27,8 +31,24 @@ jobs:
 
     - name: Install WASI SDK
       run: |
-        # Install WASI SDK for Linux
-        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-linux.tar.gz | tar -xzf - -C /opt
+        # Install WASI SDK based on OS and architecture
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          if [ "$RUNNER_ARCH" == "x64" ]; then
+            # For Linux x86_64
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-x86_64-linux.tar.gz | tar -xzf - -C /opt
+          elif [ "$RUNNER_ARCH" == "arm64" ]; then
+            # For Linux arm64
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-aarch64-linux.tar.gz | tar -xzf - -C /opt
+          fi
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          if [ "$RUNNER_ARCH" == "x64" ]; then
+            # For macOS x86_64
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-x86_64-macos.tar.gz | tar -xzf - -C /opt
+          elif [ "$RUNNER_ARCH" == "arm64" ]; then
+            # For macOS arm64
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-aarch64-macos.tar.gz | tar -xzf - -C /opt
+          fi
+        fi
         echo "WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> $GITHUB_ENV
 
     - name: Install dependencies

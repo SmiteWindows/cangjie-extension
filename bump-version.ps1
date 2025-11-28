@@ -149,10 +149,10 @@ function Update-AdditionalFiles {
             
             if ($content -ne $oldContent) {
                 if ($Preview) {
-                    Write-Host "Would update ${file}: ${CurrentVersion} -> ${NewVersion}" -ForegroundColor Yellow
+                    Write-Host "Would update ${file}: $CurrentVersion -> $NewVersion" -ForegroundColor Yellow
                 } else {
                     Set-Content -Path $file -Value $content
-                    Write-Host "✓ Updated ${file}: ${CurrentVersion} -> ${NewVersion}" -ForegroundColor Green
+                    Write-Host "✓ Updated ${file}: $CurrentVersion -> $NewVersion" -ForegroundColor Green
                 }
             }
         } else {

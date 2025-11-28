@@ -5,11 +5,40 @@
 
 param(
     [string]$SdkVersion = "1.0.4",
-    [string]$InstallPath = "C:\Program Files\Cangjie",
+    [string]$InstallPath,
     [switch]$Force = $false,
     [switch]$Help = $false,
     [switch]$NoAdminCheck = $false
 )
+
+# Function to get system architecture
+function Get-SystemArchitecture {
+    <#
+    .SYNOPSIS
+        Gets the system architecture in a standardized format.
+    .OUTPUTS
+        [string] System architecture (x86_64, aarch64, etc.).
+    #>
+    $arch = $env:PROCESSOR_ARCHITECTURE
+    switch ($arch) {
+        "AMD64" { return "x86_64" }
+        "ARM64" { return "aarch64" }
+        "x86" { return "i686" }
+        default { return $arch }
+    }
+}
+
+# Detect system architecture
+$systemArch = Get-SystemArchitecture
+
+# Set default install path based on architecture
+if (-not $InstallPath) {
+    if ($systemArch -eq "aarch64") {
+        $InstallPath = "C:\Program Files\Cangjie"
+    } else {
+        $InstallPath = "C:\Program Files\Cangjie"
+    }
+}
 
 # Function to show help information
 function Show-Help {
@@ -41,21 +70,37 @@ function Test-Administrator {
 function Download-CangjieSdk {
     param(
         [string]$Version,
-        [string]$OutputPath
+        [string]$OutputPath,
+        [string]$Architecture
     )
     
-    Write-Host "📥 Downloading Cangjie SDK $Version..."
+    Write-Host "📥 Downloading Cangjie SDK $Version for $Architecture..."
     
-    $downloadUrl = "https://cangjie-lang.cn/download/$Version"
+    # Use architecture-specific download URL if available
+    # If architecture-specific URL fails, fall back to generic URL
+    $downloadUrl = "https://cangjie-lang.cn/download/$Version?arch=$Architecture"
+    $fallbackUrl = "https://cangjie-lang.cn/download/$Version"
     
     try {
+        # Try architecture-specific URL first
+        Write-Host "   Trying architecture-specific URL: $downloadUrl" -ForegroundColor DarkGray
         Invoke-WebRequest -Uri $downloadUrl -OutFile $OutputPath -UseBasicParsing -ErrorAction Stop
         Write-Host "✅ Download completed successfully!" -ForegroundColor Green
         return $true
     } catch {
-        Write-Host "❌ Download failed: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host "📝 Tip: Check your internet connection and try again." -ForegroundColor Yellow
-        return $false
+        Write-Host "⚠️  Architecture-specific download failed: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "   Falling back to generic URL: $fallbackUrl" -ForegroundColor DarkGray
+        
+        # Try fallback URL
+        try {
+            Invoke-WebRequest -Uri $fallbackUrl -OutFile $OutputPath -UseBasicParsing -ErrorAction Stop
+            Write-Host "✅ Download completed successfully with fallback URL!" -ForegroundColor Green
+            return $true
+        } catch {
+            Write-Host "❌ Download failed: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "📝 Tip: Check your internet connection and try again." -ForegroundColor Yellow
+            return $false
+        }
     }
 }
 
@@ -263,7 +308,7 @@ New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
 $zipPath = Join-Path -Path $tempDir -ChildPath "cangjie-sdk.zip"
 
 # Download the SDK
-if (-not (Download-CangjieSdk -Version $SdkVersion -OutputPath $zipPath)) {
+if (-not (Download-CangjieSdk -Version $SdkVersion -OutputPath $zipPath -Architecture $systemArch)) {
     Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
     exit 1
 }

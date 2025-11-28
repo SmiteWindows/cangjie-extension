@@ -7,10 +7,16 @@ on:
 
 jobs:
   update-dependencies:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-${{ matrix.arch }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu, windows, macos]
+        arch: [x64]
+        include:
+          - os: ubuntu
+            arch: arm64
+          - os: macos
+            arch: arm64
       fail-fast: false
 
     steps:

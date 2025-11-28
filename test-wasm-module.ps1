@@ -33,12 +33,19 @@ param(
     [switch]$RunModule = $false,
     [string]$WasmTarget = "wasm32-wasip2",
     [string]$WasmFilePath = "",
-    [string]$WasmtimeVersion = "latest"
+    [string]$WasmtimeVersion = "latest",
+    [switch]$Help = $false
 )
 
 # Set strict mode for better error handling
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+# Show help if requested
+if ($Help) {
+    Get-Help -Name $PSCommandPath -Full
+    exit 0
+}
 
 # Constants
 $WASMTIME_RELEASES_URL = "https://github.com/bytecodealliance/wasmtime/releases"

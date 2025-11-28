@@ -62,6 +62,23 @@ function Test-WasiSdkConfigured {
     return $false
 }
 
+# Function to get system architecture
+function Get-SystemArchitecture {
+    <#
+    .SYNOPSIS
+        Gets the system architecture in a standardized format.
+    .OUTPUTS
+        [string] System architecture (x86_64, aarch64, etc.).
+    #>
+    $arch = $env:PROCESSOR_ARCHITECTURE
+    switch ($arch) {
+        "AMD64" { return "x86_64" }
+        "ARM64" { return "aarch64" }
+        "x86" { return "i686" }
+        default { return $arch }
+    }
+}
+
 # Function to validate WASI SDK directory
 function Validate-WasiSdkDirectory {
     param(
@@ -73,11 +90,23 @@ function Validate-WasiSdkDirectory {
         return $false
     }
     
+    # Detect system architecture
+    $systemArch = Get-SystemArchitecture
+    
     # Check if the directory contains expected WASI SDK files
+    # Adjust expected files based on architecture if needed
     $expectedFiles = @(
         "bin/clang.exe",
         "share/wasi-sysroot/include"
     )
+    
+    # For non-Windows systems, adjust the expected files
+    if (-not $IsWindows) {
+        $expectedFiles = @(
+            "bin/clang",
+            "share/wasi-sysroot/include"
+        )
+    }
     
     foreach ($file in $expectedFiles) {
         $fullPath = Join-Path -Path $Path -ChildPath $file
@@ -105,7 +134,7 @@ function Set-WasiSdkPath {
     
     # Set environment variable permanently with the specified scope
     [Environment]::SetEnvironmentVariable("WASI_SDK_PATH", $Path, $Scope)
-    Write-Host "✅ Set WASI_SDK_PATH permanently for $Scope: $Path" -ForegroundColor Green
+    Write-Host "✅ Set WASI_SDK_PATH permanently for ${Scope}: $Path" -ForegroundColor Green
     
     Write-Host ""
     Write-Host "📋 Verification:"

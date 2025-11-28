@@ -19,9 +19,16 @@ Cangjie Extension 是为 Zed 编辑器提供的 Cangjie 编程语言支持扩展
 - Node.js 和 npm（用于构建脚本）
 - Rust 和 Cargo（用于编译 Rust 代码和 WASM）
 - Tree-sitter CLI（用于生成和构建语法解析器）
-- WASI SDK 29.0+（用于编译 WASM 模块）
-- Cangjie SDK 1.0.4+（用于开发和测试）
-- PowerShell 7.0+（用于运行项目提供的 PowerShell 脚本）
+- WASI SDK 29.0+（用于编译 WASM 模块，支持 x86_64 和 arm64 架构）
+- Cangjie SDK 1.0.4+（用于开发和测试，支持 x86_64 和 arm64 架构）
+- PowerShell 7.0+（用于运行项目提供的 PowerShell 脚本，支持 x86_64 和 arm64 架构）
+
+### 2.1.1 架构支持
+项目全面支持以下架构：
+- **x86_64**（64位 Intel/AMD）
+- **arm64**（64位 ARM，如 Apple Silicon、Windows on ARM）
+
+所有构建脚本、SDK 安装脚本和验证脚本都已优化，可自动检测系统架构并使用相应的配置。
 
 ### 2.2 依赖安装
 
@@ -118,15 +125,39 @@ npm install -g tree-sitter-cli
 #### 安装 WASI SDK
 
 **Linux/macOS**：
+
 ```bash
+# 自动检测架构
+ARCH=$(uname -m)
+
+# 根据架构选择正确的 WASI SDK 下载 URL
+if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+    WASI_SDK_URL="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-aarch64-linux.tar.gz"
+else
+    WASI_SDK_URL="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-x86_64-linux.tar.gz"
+fi
+
 # 下载并安装 WASI SDK 29.0
-curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-linux.tar.gz | tar -xzf - -C /opt
+curl -sSfL $WASI_SDK_URL | tar -xzf - -C /opt
 
 # 设置 WASI_SDK_PATH 环境变量
 export WASI_SDK_PATH=/opt/wasi-sdk-29.0
 
 # 将环境变量添加到 shell 配置文件（可选，以便永久生效）
 echo "export WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> ~/.bashrc  # 或 ~/.zshrc
+```
+
+**macOS (Apple Silicon)**：
+
+```bash
+# 下载并安装 WASI SDK 29.0 for arm64
+curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-aarch64-macos.tar.gz | tar -xzf - -C /opt
+
+# 设置 WASI_SDK_PATH 环境变量
+export WASI_SDK_PATH=/opt/wasi-sdk-29.0
+
+# 将环境变量添加到 shell 配置文件（可选，以便永久生效）
+echo "export WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> ~/.zshrc
 ```
 
 **Windows**（PowerShell）：
@@ -166,7 +197,7 @@ $env:WASI_SDK_PATH = $wasiSdkPath
 
 ##### 方法一：使用安装脚本（推荐）
 
-项目提供了一个 PowerShell 脚本，可以自动下载、安装和配置 Cangjie SDK：
+项目提供了一个 PowerShell 脚本，可以自动下载、安装和配置 Cangjie SDK，支持 x86_64 和 arm64 架构：
 
 **Windows**：
 ```powershell
@@ -178,11 +209,18 @@ $env:WASI_SDK_PATH = $wasiSdkPath
 ```
 
 **脚本功能**：
-- 自动下载指定版本的 Cangjie SDK
+- 自动检测系统架构（x86_64 或 arm64）
+- 自动下载指定版本和架构的 Cangjie SDK
 - 安装到指定目录
 - 配置环境变量（`CANGJIE_HOME` 和 `PATH`）
 - 验证安装是否成功
 - 清理临时文件
+- 支持 x86_64 和 arm64 架构
+
+**架构支持**：
+- 脚本会自动检测系统架构，并尝试下载对应架构的 Cangjie SDK
+- 如果架构特定的 SDK 不可用，会自动回退到通用版本
+- 支持 Windows x86_64、Windows arm64、Linux x86_64、Linux arm64 和 macOS arm64（Apple Silicon）
 
 ##### 方法二：手动安装
 
@@ -645,12 +683,14 @@ node scripts/build-grammar.js --only-wasm
 
 #### setup-wasi-sdk.ps1
 
-用于配置WASI SDK环境变量。
+用于配置WASI SDK环境变量，支持x86_64和arm64架构。
 
 **功能**：
+- 自动检测系统架构（x86_64或arm64）
 - 设置 `WASI_SDK_PATH` 环境变量
 - 支持用户级和系统级环境变量
 - 验证环境变量设置是否成功
+- 根据架构和操作系统调整预期的WASI SDK文件结构
 
 **参数**：
 - `-WasiSdkPath`：WASI SDK的安装路径
@@ -665,6 +705,12 @@ node scripts/build-grammar.js --only-wasm
 # 配置系统级环境变量
 .\setup-wasi-sdk.ps1 -WasiSdkPath "C:\opt\wasi-sdk-29.0" -Scope Machine
 ```
+
+**架构支持**：
+- 脚本会自动检测系统架构
+- 对于Windows系统，验证WASI SDK目录时检查 `bin/clang.exe`
+- 对于非Windows系统，验证WASI SDK目录时检查 `bin/clang`
+- 支持x86_64和arm64架构的WASI SDK安装
 
 #### test-wasm-module.ps1
 

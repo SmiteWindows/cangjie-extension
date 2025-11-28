@@ -1,16 +1,1 @@
-<!-- CHANGELOG.md -->
-# Changelog
-
-## [0.1.0] - 2024-01-01
-
-### Added
-- Initial release of Cangjie language support
-- Syntax highlighting with tree-sitter
-- Language Server Protocol support
-- Basic code completion
-- Go to definition
-- Find references
-- Hover documentation
-- Formatting support
-- Error reporting
-- Task templates for running and building
+# Changelog\n\nAll notable changes to this project will be documented in this file.\n\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\nand this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n\n## 0.1.0 (2025-11-28)\n\n### feat\n\n- 娣诲姞椤圭洰PS1鏂囦欢楠岃瘉鑴氭湰\n- 娣诲姞澶氫釜娴嬭瘯鐢ㄤ緥骞舵墿灞曡瑷€缁戝畾鏀寔\n- 娣诲姞 PowerShell 7 鏀寔骞堕噸鏋勮剼鏈?feat(parser): 瀹炵幇澶氳鍘熷瀛楃涓插拰缂╄繘澶勭悊鐨勫閮ㄦ壂鎻忓櫒\n- 娣诲姞瀹屾暣鐨凜angjie璇█鏀寔鎵╁睍鍔熻兘\n- 娣诲姞tree-sitter-cangjie鏌ヨ鏂囦欢鍜孯EADME\n\n### fix\n\n- 淇tree-sitter-cangjie缁戝畾涓殑鍛藉悕閿欒\n\n### docs\n\n- 鏇存柊閰嶇疆鏂囨。骞舵坊鍔燩owerShell鑴氭湰璇存槑\n\n### build\n\n- 鏇存柊鏋勫缓渚濊禆 cc 鍒?1.2 鐗堟湰\n- 灏咰鏍囧噯浠嶤11鍗囩骇鍒癈17\n- 鏇存柊 tree-sitter 渚濊禆鐗堟湰鑷?0.25.0 骞剁Щ闄?type 瀛楁\n\n### ci\n\n- 绉婚櫎宸ヤ綔娴佹枃浠朵腑鐨勫浣欑┖琛?ci: 鏇存柊宸ヤ綔娴侀厤缃拰鑴氭湰瑕佹眰\n- 娣诲姞鑷姩鏇存柊渚濊禆鐨凣itHub宸ヤ綔娴佸拰鑴氭湰\n- 绉婚櫎 PowerShell 7 鐨勫畨瑁呮楠?ci(workflow): 鏇存柊鐢熸垚鍙樻洿鏃ュ織鐨勮剼鏈矾寰?chore: 鏇存柊浠撳簱URL涓篻itcode闀滃儚鍦板潃\n- 鏇存柊CI閰嶇疆鍜屼粨搴揢RL\n- 娣诲姞 GitHub Actions CI 宸ヤ綔娴佸苟鏇存柊娴嬭瘯鑴氭湰\n\n### chore\n\n- 绉婚櫎瀛愭ā鍧楄窡韪苟娣诲姞鍒?gitignore\n\n### other\n\nfeat(瀹夎鑴氭湰): 娣诲姞妫€鏌DK鏄惁宸插畨瑁呯殑鍔熻兘\nci(workflow): 浣跨敤椤圭洰鑴氭湰绠€鍖朇I娴佺▼\nfeat(wasm): 娣诲姞WASM妯″潡娴嬭瘯鑴氭湰\nfeat(閰嶇疆): 娣诲姞 PowerShell 鑴氭湰鐢ㄤ簬 WASI SDK 鍜?Cangjie SDK 鐨勫畨瑁呴厤缃?build: 鏇存柊宸ュ叿閾惧拰鏋勫缓閰嶇疆\nfeat(build): 娣诲姞 WASI SDK 鏀寔骞舵洿鏂版枃妗?refactor(ci): 灏咰angjie SDK瀹夎姝ラ鏀逛负鍙€?feat(extension): 娣诲姞LSP鏀寔鍜屾墿灞曞姛鑳?feat(ci): 鏇存柊WASI SDK鑷?9.0骞舵坊鍔燱asmtime鏀寔\nfeat(宸ュ叿閾?: 鏇存柊宸ュ叿閾鹃厤缃苟娣诲姞澶氳瑷€缁戝畾娴嬭瘯\nfeat(grammar): 澧炲姞鍚庣紑琛ㄨ揪寮忔敮鎸佸苟浼樺寲涓€鍏冭〃杈惧紡瑙ｆ瀽\nci(workflow): 娣诲姞 Windows 骞冲彴鐨?WASI SDK 瀹夎姝ラ\nrefactor(build): 閲嶆瀯WASM鏋勫缓娴佺▼浣跨敤Rust鏇夸唬emcc/docker\nci(workflows): 娣诲姞 Emscripten 璁剧疆姝ラ\nci(workflow): 鏀硅繘Cangjie SDK瀹夎鑴氭湰鐨勫仴澹€?fix(ci): 鏇存柊CI宸ヤ綔娴佷互浣跨敤PowerShell骞朵慨澶嶅懡浠?ci: 娣诲姞 Cangjie SDK 瀹夎姝ラ鍒?CI 娴佺▼\nci(workflow): 绉婚櫎tree-sitter-cangjie鐨勫伐浣滅洰褰曢厤缃?chore: 娣诲姞 cangjie 瀛愭ā鍧?chore: 娣诲姞 Rust 娴嬭瘯鑴氭湰鍒?package.json\nci(workflow): 灏唍pm鍙戝竷姝ラ鏇挎崲涓烘竻鐞嗘瀯寤轰骇鐗?refactor: 鏇存柊鎵╁睍閰嶇疆骞舵竻鐞嗘湭浣跨敤鐨勮剼鏈?ci: 绉婚櫎宸ヤ綔娴佹枃浠朵腑鐨勫浣欑┖琛屽拰powershell璁剧疆\nrefactor(grammar): 鏇存柊璇硶瑙勫垯骞惰皟鏁翠紭鍏堢骇\nrefactor(grammar): 绉婚櫎鍐椾綑鐨勫啿绐佸鐞嗚鍒?feat: 娣诲姞澶氫釜PowerShell鑴氭湰鐢ㄤ簬绠＄悊Cangjie璇█鐨凾ree-sitter瑙ｆ瀽鍣?feat: 娣诲姞澶氫釜娴嬭瘯鐢ㄤ緥鏂囦欢\nrefactor(tree-sitter-cangjie): 绠€鍖栬娉曟爲鑺傜偣绫诲瀷瀹氫箟\nfeat(璇硶鍒嗘瀽鍣?: 澧炲己绫诲瀷绯荤粺鍜岃〃杈惧紡瑙ｆ瀽鑳藉姏\nrefactor(璇硶瑙ｆ瀽鍣?: 閲嶆瀯淇グ绗﹀鐞嗗苟娣诲姞涓诲嚱鏁版敮鎸?refactor(grammar): 绠€鍖栬〃杈惧紡瑙勫垯骞剁Щ闄ゆ湭浣跨敤鐨勫啿绐佽鍒?feat(璇硶瑙ｆ瀽): 娣诲姞甯搁噺if琛ㄨ揪寮忔敮鎸佸苟瀹屽杽娴嬭瘯鐢ㄤ緥\nrefactor(grammar): 閲嶆瀯琛ㄨ揪寮忚В鏋愯鍒欏苟娣诲姞杩愮畻绗︿紭鍏堢骇\nrefactor(grammar): 閲嶆瀯琛ㄨ揪寮忚В鏋愯鍒欏苟浼樺寲鍐茬獊澶勭悊\nrefactor(grammar): 閲嶆瀯琛ㄨ揪寮忚В鏋愰€昏緫骞剁畝鍖栬妭鐐圭被鍨?refactor(parser): 閲嶆瀯琛ㄨ揪寮忚В鏋愰€昏緫锛屽紩鍏rimary_expression灞傜骇\nfeat(grammar): 娣诲姞鏂扮殑璇硶瑙勫垯缁勫悎\nfix(parser): 淇瀛楃涓茶В鏋愬拰璇硶楂樹寒闂\nrefactor(extension): 灏嗚娉曞垎鏋愬櫒閰嶇疆浠庤繙绋嬩粨搴撴敼涓烘湰鍦拌矾寰?浼樺寲椤圭洰閰嶇疆锛屼慨澶嶇紪璇戣鍛?chore: 娓呯悊骞舵洿鏂?gitignore鏂囦欢\nfeat(璇硶鍒嗘瀽鍣?: 鏇存柊璇硶鍒嗘瀽鍣ㄤ粨搴撳湴鍧€骞舵敼杩涜娉曡鍒?refactor: 閲嶆瀯娴嬭瘯浠ｇ爜骞舵敼杩涗簩杩涘埗鍚嶇О澶勭悊\nUpdate integration_test.rs to match current implementation\nUpdate .gitignore to ignore grammars/cangjie/ directory\nAdd cangjie.wasm\n璇曢獙鐗堟湰0.1.1\nUpdate extension.toml\n璇曢獙鐗堟湰0.1.1\n璇曢獙鐗堟湰0.1.0\n\n
