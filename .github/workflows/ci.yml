@@ -24,7 +24,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
 
 
 
@@ -154,15 +154,15 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         # Install WASI SDK for Linux/macOS
-        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-21/wasi-sdk-21.0-linux.tar.gz | tar -xzf - -C /opt
-        echo "WASI_SDK_PATH=/opt/wasi-sdk-21.0" >> $GITHUB_ENV
+        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-linux.tar.gz | tar -xzf - -C /opt
+        echo "WASI_SDK_PATH=/opt/wasi-sdk-22.0" >> $GITHUB_ENV
       shell: bash
 
     - name: Install WASI SDK (Windows)
       if: runner.os == 'Windows'
       run: |
         # Install WASI SDK for Windows
-        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-21/wasi-sdk-21.0-mingw.tar.gz"
+        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-mingw.tar.gz"
         $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasi-sdk-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         $wasiSdkFile = Join-Path -Path $tempDir -ChildPath "wasi-sdk.tar.gz"
@@ -184,17 +184,23 @@ jobs:
     - name: Run tree-sitter tests
       run: npm run test
 
-  build-rust:
+  test-bindings:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
 
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
         fetch-tags: true
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
     - name: Set up Rust
       uses: dtolnay/rust-toolchain@master
@@ -203,19 +209,36 @@ jobs:
         override: true
         targets: wasm32-wasip2, wasm32-unknown-unknown
 
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Set up Swift (macOS only)
+      if: runner.os == 'macOS'
+      run: |
+        # Swift is pre-installed on macOS GitHub runners
+        swift --version
+      shell: bash
+
     - name: Install WASI SDK (Linux/macOS)
       if: runner.os != 'Windows'
       run: |
         # Install WASI SDK for Linux/macOS
-        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-21/wasi-sdk-21.0-linux.tar.gz | tar -xzf - -C /opt
-        echo "WASI_SDK_PATH=/opt/wasi-sdk-21.0" >> $GITHUB_ENV
+        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-linux.tar.gz | tar -xzf - -C /opt
+        echo "WASI_SDK_PATH=/opt/wasi-sdk-22.0" >> $GITHUB_ENV
       shell: bash
 
     - name: Install WASI SDK (Windows)
       if: runner.os == 'Windows'
       run: |
         # Install WASI SDK for Windows
-        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-21/wasi-sdk-21.0-mingw.tar.gz"
+        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-mingw.tar.gz"
         $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasi-sdk-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         $wasiSdkFile = Join-Path -Path $tempDir -ChildPath "wasi-sdk.tar.gz"
@@ -228,8 +251,34 @@ jobs:
         echo "WASI_SDK_PATH=$wasiSdkPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       shell: pwsh
 
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build tree-sitter grammar
+      run: npm run build-grammar
+
     - name: Run Rust tests
       run: npm run test-rust
 
     - name: Build WASM
       run: npm run build-wasm
+
+    - name: Run Go binding tests
+      run: |
+        cd tree-sitter-cangjie
+        go test ./bindings/go -v
+      shell: bash
+
+    - name: Run Python binding tests
+      run: |
+        cd tree-sitter-cangjie
+        pip install tree-sitter
+        python -m pytest bindings/python/tests/test_binding.py -v
+      shell: bash
+
+    - name: Run Swift binding tests (macOS only)
+      if: runner.os == 'macOS'
+      run: |
+        cd tree-sitter-cangjie
+        swift test --package-path bindings/swift
+      shell: bash

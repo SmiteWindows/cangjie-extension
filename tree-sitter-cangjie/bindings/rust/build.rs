@@ -2,10 +2,15 @@ fn main() {
     let src_dir = std::path::Path::new("src");
 
     let mut c_config = cc::Build::new();
-    c_config.std("c11").include(src_dir);
+    c_config.std("c17").include(src_dir);
 
-    #[cfg(target_env = "msvc")]
-    c_config.flag("-utf-8");
+    // Only add -utf-8 flag if we're building for Windows MSVC target
+    // This flag is only needed for MSVC compiler (cl.exe),
+    // and we don't use MSVC for WASM builds
+    let target = std::env::var("TARGET").unwrap_or_default();
+    if target.contains("msvc") && !target.contains("wasm32") {
+        c_config.flag("-utf-8");
+    }
 
     let parser_path = src_dir.join("parser.c");
     c_config.file(&parser_path);

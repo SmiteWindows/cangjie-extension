@@ -16,12 +16,20 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
 
-    - name: Set up Emscripten
-      uses: mymindstorm/setup-emsdk@v11
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@master
       with:
-        version: '3.1.45'
+        toolchain: stable
+        override: true
+        targets: wasm32-wasip2, wasm32-unknown-unknown
+
+    - name: Install WASI SDK
+      run: |
+        # Install WASI SDK for Linux
+        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-linux.tar.gz | tar -xzf - -C /opt
+        echo "WASI_SDK_PATH=/opt/wasi-sdk-22.0" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: npm install

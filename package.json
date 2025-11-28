@@ -15,6 +15,6 @@
     "clean": "rm -rf tree-sitter-cangjie/src/parser.c tree-sitter-cangjie/src/parser.h tree-sitter-cangjie/src/tree_sitter/*.h tree-sitter-cangjie.wasm"
   },
   "devDependencies": {
-    "tree-sitter-cli": "^0.25.0"
+    "tree-sitter-cli": "^0.25.10"
   }
 }
