@@ -154,15 +154,15 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         # Install WASI SDK for Linux/macOS
-        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-linux.tar.gz | tar -xzf - -C /opt
-        echo "WASI_SDK_PATH=/opt/wasi-sdk-22.0" >> $GITHUB_ENV
+        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-linux.tar.gz | tar -xzf - -C /opt
+        echo "WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> $GITHUB_ENV
       shell: bash
 
     - name: Install WASI SDK (Windows)
       if: runner.os == 'Windows'
       run: |
         # Install WASI SDK for Windows
-        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-mingw.tar.gz"
+        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-mingw.tar.gz"
         $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasi-sdk-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         $wasiSdkFile = Join-Path -Path $tempDir -ChildPath "wasi-sdk.tar.gz"
@@ -173,6 +173,35 @@ jobs:
         $wasiSdkDir = Get-ChildItem -Path $tempDir -Name "wasi-sdk-*" | Select-Object -First 1
         $wasiSdkPath = Join-Path -Path $tempDir -ChildPath $wasiSdkDir
         echo "WASI_SDK_PATH=$wasiSdkPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      shell: pwsh
+
+    - name: Install Wasmtime (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        curl -sSf https://wasmtime.dev/install.sh | bash
+        echo "$HOME/.wasmtime/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Install Wasmtime (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        curl -sSf https://wasmtime.dev/install.sh | bash
+        echo "$HOME/.wasmtime/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Install Wasmtime (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        $wasmtimeUrl = "https://github.com/bytecodealliance/wasmtime/releases/download/v20.0.0/wasmtime-v20.0.0-x86_64-windows.zip"
+        $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasmtime-$(Get-Random)"
+        New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+        $wasmtimeFile = Join-Path -Path $tempDir -ChildPath "wasmtime.zip"
+        Invoke-WebRequest -Uri $wasmtimeUrl -OutFile $wasmtimeFile -UseBasicParsing
+        
+        Expand-Archive -Path $wasmtimeFile -DestinationPath $tempDir -Force
+        $wasmtimeDir = Get-ChildItem -Path $tempDir -Name "wasmtime-*" | Select-Object -First 1
+        $wasmtimePath = Join-Path -Path $tempDir -ChildPath $wasmtimeDir
+        echo "$wasmtimePath" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
       shell: pwsh
 
     - name: Install dependencies
@@ -230,15 +259,15 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         # Install WASI SDK for Linux/macOS
-        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-linux.tar.gz | tar -xzf - -C /opt
-        echo "WASI_SDK_PATH=/opt/wasi-sdk-22.0" >> $GITHUB_ENV
+        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-linux.tar.gz | tar -xzf - -C /opt
+        echo "WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> $GITHUB_ENV
       shell: bash
 
     - name: Install WASI SDK (Windows)
       if: runner.os == 'Windows'
       run: |
         # Install WASI SDK for Windows
-        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-mingw.tar.gz"
+        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-mingw.tar.gz"
         $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasi-sdk-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         $wasiSdkFile = Join-Path -Path $tempDir -ChildPath "wasi-sdk.tar.gz"
@@ -251,17 +280,55 @@ jobs:
         echo "WASI_SDK_PATH=$wasiSdkPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       shell: pwsh
 
+    - name: Install Wasmtime (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        curl -sSf https://wasmtime.dev/install.sh | bash
+        echo "$HOME/.wasmtime/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Install Wasmtime (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        curl -sSf https://wasmtime.dev/install.sh | bash
+        echo "$HOME/.wasmtime/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Install Wasmtime (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        $wasmtimeUrl = "https://github.com/bytecodealliance/wasmtime/releases/download/v20.0.0/wasmtime-v20.0.0-x86_64-windows.zip"
+        $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasmtime-$(Get-Random)"
+        New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+        $wasmtimeFile = Join-Path -Path $tempDir -ChildPath "wasmtime.zip"
+        Invoke-WebRequest -Uri $wasmtimeUrl -OutFile $wasmtimeFile -UseBasicParsing
+        
+        Expand-Archive -Path $wasmtimeFile -DestinationPath $tempDir -Force
+        $wasmtimeDir = Get-ChildItem -Path $tempDir -Name "wasmtime-*" | Select-Object -First 1
+        $wasmtimePath = Join-Path -Path $tempDir -ChildPath $wasmtimeDir
+        echo "$wasmtimePath" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      shell: pwsh
+
     - name: Install dependencies
       run: npm install
 
-    - name: Build tree-sitter grammar
+    - name: Build tree-sitter grammar (including WASM)
       run: npm run build-grammar
 
     - name: Run Rust tests
       run: npm run test-rust
 
-    - name: Build WASM
-      run: npm run build-wasm
+    - name: Test WASM with Wasmtime
+      run: |
+        # Verify wasmtime is installed
+        wasmtime --version
+        
+        # Check if WASM file exists
+        ls -la tree-sitter-cangjie/target/wasm32-wasip2/release/
+        
+        # Run basic validation of the WASM module
+        wasmtime validate tree-sitter-cangjie/target/wasm32-wasip2/release/tree_sitter_cangjie.wasm
+      shell: bash
 
     - name: Run Go binding tests
       run: |

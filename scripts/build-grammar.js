@@ -8,6 +8,12 @@ import { execSync, spawnSync } from "child_process";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// 解析命令行参数
+const args = process.argv.slice(2);
+const options = {
+  onlyWasm: args.includes('--only-wasm')
+};
+
 /**
  * 检查命令是否可用
  * @param {string} command - 要检查的命令
@@ -44,19 +50,21 @@ function buildTreeSitterGrammar() {
     const grammarDir = join(__dirname, "..", "tree-sitter-cangjie");
 
     if (existsSync(grammarDir)) {
-      // 生成解析器
-      console.log("📦 Generating tree-sitter parser...");
-      execSync("npx tree-sitter generate", {
-        cwd: grammarDir,
-        stdio: "inherit",
-      });
+      if (!options.onlyWasm) {
+        // 生成解析器
+        console.log("📦 Generating tree-sitter parser...");
+        execSync("npx tree-sitter generate", {
+          cwd: grammarDir,
+          stdio: "inherit",
+        });
 
-      // 构建解析器
-      console.log("🔨 Building parser...");
-      execSync("npx tree-sitter build", {
-        cwd: grammarDir,
-        stdio: "inherit",
-      });
+        // 构建解析器
+        console.log("🔨 Building parser...");
+        execSync("npx tree-sitter build", {
+          cwd: grammarDir,
+          stdio: "inherit",
+        });
+      }
 
       // Rust WASM构建
       console.log("🌐 Building Rust WASM...");

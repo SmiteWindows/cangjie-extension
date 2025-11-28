@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run build-grammar",
     "build-grammar": "node scripts/build-grammar.js",
-    "build-wasm": "npm run build-grammar",
+    "build-wasm": "node scripts/build-grammar.js --only-wasm",
     "build-wasm-rust": "cd tree-sitter-cangjie && cargo build --target wasm32-wasip2 --release",
     "build-wasm-web": "cd tree-sitter-cangjie && cargo build --target wasm32-unknown-unknown --release",
     "generate": "cd tree-sitter-cangjie && npx tree-sitter generate",
