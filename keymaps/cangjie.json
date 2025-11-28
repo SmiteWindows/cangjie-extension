@@ -22,6 +22,14 @@
     "ctrl+d": "editor::SelectNextOccurrence",
     "ctrl+shift+l": "editor::SelectAllOccurrences",
     "ctrl+[ ": "editor::IndentLess",
-    "ctrl+] ": "editor::IndentMore"
+    "ctrl+] ": "editor::IndentMore",
+    "ctrl+shift+b": "workspace::RunTask",
+    "f5": "debugger::StartDebugging",
+    "f9": "debugger::ToggleBreakpoint",
+    "f10": "debugger::StepOver",
+    "f11": "debugger::StepInto",
+    "shift+f11": "debugger::StepOut",
+    "ctrl+shift+f5": "debugger::Restart",
+    "ctrl+f5": "debugger::Continue"
   }
 }

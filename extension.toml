@@ -10,7 +10,7 @@ license = "MIT"
 categories = ["language", "programming"]
 min_zed_version = "0.214.0"
 languages = ["Cangjie"]
-capabilities = []
+capabilities = ["lsp", "grammar", "snippets", "keymaps", "themes"]
 file_types = ["cj"]
 
 # 语法分析器配置
