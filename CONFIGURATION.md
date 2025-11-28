@@ -428,7 +428,29 @@ node scripts/build-grammar.js --only-wasm
 
 ### 6.4 验证 WASM 模块
 
-构建完成后，可以使用 Wasmtime 来验证 WASM 模块：
+构建完成后，可以使用项目提供的 `test-wasm-module.ps1` 脚本或手动使用 Wasmtime 来验证 WASM 模块：
+
+#### 方法一：使用 test-wasm-module.ps1 脚本（推荐）
+
+项目提供了一个功能全面的 PowerShell 脚本，可以自动验证 WASM 模块：
+
+```powershell
+# 基本验证（检查 wasmtime 安装、WASM 文件存在性、验证模块）
+.	est-wasm-module.ps1
+
+# 自动安装 wasmtime 并验证
+.	est-wasm-module.ps1 -InstallWasmtime
+
+# 验证并运行模块
+.	est-wasm-module.ps1 -RunModule
+
+# 验证不同目标的 WASM 模块
+.	est-wasm-module.ps1 -WasmTarget wasm32-unknown-unknown
+```
+
+#### 方法二：手动验证
+
+如果您更喜欢手动验证，可以使用以下命令：
 
 ```bash
 # 验证 wasmtime 安装
@@ -592,6 +614,149 @@ node scripts/build-grammar.js --only-wasm
 
 ### 11.2 PowerShell脚本
 
+#### setup-cangjie-sdk.ps1
+
+用于自动下载、安装和配置Cangjie SDK。
+
+**功能**：
+- 自动下载指定版本的Cangjie SDK
+- 安装到指定目录
+- 配置环境变量（`CANGJIE_HOME` 和 `PATH`）
+- 验证安装是否成功
+- 清理临时文件
+
+**参数**：
+- `-SdkVersion`：指定要安装的Cangjie SDK版本，默认1.0.4
+- `-InstallPath`：指定安装路径，默认`C:\Program Files\Cangjie`
+- `-Force`：强制重新安装，覆盖现有安装
+- `-Silent`：静默安装，不显示详细输出
+
+**用法**：
+```powershell
+# 安装默认版本到默认路径
+.\setup-cangjie-sdk.ps1
+
+# 安装指定版本到自定义路径
+.\setup-cangjie-sdk.ps1 -SdkVersion 1.0.4 -InstallPath "D:\Program Files\Cangjie"
+
+# 强制重新安装
+.\setup-cangjie-sdk.ps1 -Force
+```
+
+#### setup-wasi-sdk.ps1
+
+用于配置WASI SDK环境变量。
+
+**功能**：
+- 设置 `WASI_SDK_PATH` 环境变量
+- 支持用户级和系统级环境变量
+- 验证环境变量设置是否成功
+
+**参数**：
+- `-WasiSdkPath`：WASI SDK的安装路径
+- `-Scope`：环境变量作用域（User或Machine），默认User
+- `-Silent`：静默模式，不显示详细输出
+
+**用法**：
+```powershell
+# 配置WASI SDK环境变量
+.\setup-wasi-sdk.ps1 -WasiSdkPath "D:\Downloads\wasi-sdk-29.0-x86_64-windows\wasi-sdk-29.0-x86_64-windows"
+
+# 配置系统级环境变量
+.\setup-wasi-sdk.ps1 -WasiSdkPath "C:\opt\wasi-sdk-29.0" -Scope Machine
+```
+
+#### test-wasm-module.ps1
+
+用于验证WASM模块，包括wasmtime安装、WASM文件检查和模块验证。
+
+**功能**：
+- 检查wasmtime安装情况，支持自动安装
+- 验证WASM文件存在性
+- 列出WASM文件所在目录内容
+- 验证WASM模块结构
+- 可选：运行WASM模块
+- 支持多种WASM目标
+
+**参数**：
+- `-InstallWasmtime`：自动安装wasmtime，无需交互提示
+- `-RunModule`：验证后运行WASM模块
+- `-WasmTarget`：指定WASM目标（如wasm32-wasip2），默认wasm32-wasip2
+- `-WasmFilePath`：指定自定义WASM文件路径
+- `-WasmtimeVersion`：指定要安装的wasmtime版本，默认latest
+
+**用法**：
+```powershell
+# 基本验证
+.	est-wasm-module.ps1
+
+# 自动安装wasmtime并验证
+.	est-wasm-module.ps1 -InstallWasmtime
+
+# 验证并运行模块
+.	est-wasm-module.ps1 -RunModule
+
+# 验证不同目标的WASM模块
+.	est-wasm-module.ps1 -WasmTarget wasm32-unknown-unknown
+
+# 验证自定义WASM文件
+.	est-wasm-module.ps1 -WasmFilePath "path/to/custom.wasm"
+```
+
+#### validate-project-ps1.ps1
+
+用于验证项目中的PowerShell脚本，确保它们符合要求。
+
+**功能**：
+- 检查所有PowerShell脚本是否包含 `#Requires -Version 7.0` 指令
+- 验证脚本语法正确性
+- 支持排除特定文件或目录
+- 生成验证报告
+
+**参数**：
+- `-ExcludePaths`：要排除的文件或目录列表
+- `-ReportPath`：生成验证报告的路径
+- `-Silent`：静默模式，仅显示错误
+
+**用法**：
+```powershell
+# 验证所有PowerShell脚本
+.\validate-project-ps1.ps1
+
+# 排除node_modules目录
+.\validate-project-ps1.ps1 -ExcludePaths "node_modules"
+
+# 生成验证报告
+.\validate-project-ps1.ps1 -ReportPath "validation-report.txt"
+```
+
+#### update-ps1-scripts.ps1
+
+用于确保所有PowerShell脚本都包含PowerShell 7版本要求。
+
+**功能**：
+- 检查所有PowerShell脚本是否包含 `#Requires -Version 7.0` 指令
+- 为缺少指令的脚本添加 `#Requires -Version 7.0` 指令
+- 支持排除特定文件
+- 生成更新报告
+
+**参数**：
+- `-Exclude`：要排除的文件列表
+- `-DryRun`：预览模式，不实际修改文件
+- `-Report`：生成更新报告
+
+**用法**：
+```powershell
+# 更新所有PowerShell脚本
+.\update-ps1-scripts.ps1
+
+# 预览更新，不实际修改文件
+.\update-ps1-scripts.ps1 -DryRun
+
+# 排除特定文件
+.\update-ps1-scripts.ps1 -Exclude "test.ps1,example.ps1"
+```
+
 #### bump-version.ps1
 
 用于更新项目版本号和创建git标签。
@@ -728,5 +893,5 @@ Tree-sitter相关的工具脚本，提供多种操作。
 
 ---
 
-**文档版本**：1.0.0
+**文档版本**：1.1.0
 **最后更新**：2025-11-28
