@@ -16,7 +16,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '24'
 
     - name: Set up Rust
       uses: dtolnay/rust-toolchain@master
@@ -28,8 +28,8 @@ jobs:
     - name: Install WASI SDK
       run: |
         # Install WASI SDK for Linux
-        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-22/wasi-sdk-22.0-linux.tar.gz | tar -xzf - -C /opt
-        echo "WASI_SDK_PATH=/opt/wasi-sdk-22.0" >> $GITHUB_ENV
+        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-linux.tar.gz | tar -xzf - -C /opt
+        echo "WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: npm install

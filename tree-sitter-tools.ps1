@@ -105,16 +105,26 @@ function Build-TreeSitter {
         Write-Host "Building Rust bindings..."
         cargo build --release
         
-        # Build WASM
-        Write-Host "Building WASM..."
-        npx tree-sitter build --wasm
+        # Build WASI WASM (for server-side)
+        Write-Host "Building WASI WASM..."
+        cargo build --target wasm32-wasip2 --release
         
-        # Copy WASM to main directory using Join-Path for better path handling
-        $wasmFiles = Get-ChildItem -Path "*.wasm" -ErrorAction SilentlyContinue
-        if ($wasmFiles.Count -gt 0) {
-            $wasmFiles | ForEach-Object {
-                Copy-Item -Path $_.FullName -Destination ".." -Force
-            }
+        # Build Web WASM (for browser)
+        Write-Host "Building Web WASM..."
+        cargo build --target wasm32-unknown-unknown --release
+        
+        # Copy WASI WASM to main directory
+        $wasiWasmPath = Join-Path -Path "target" -ChildPath "wasm32-wasip2" -ChildPath "release" -ChildPath "tree_sitter_cangjie.wasm"
+        if (Test-Path -Path $wasiWasmPath -PathType Leaf) {
+            Copy-Item -Path $wasiWasmPath -Destination ".." -Force
+            Write-Host "✓ Copied WASI WASM to main directory" -ForegroundColor Green
+        }
+        
+        # Copy Web WASM to main directory
+        $webWasmPath = Join-Path -Path "target" -ChildPath "wasm32-unknown-unknown" -ChildPath "release" -ChildPath "tree_sitter_cangjie.wasm"
+        if (Test-Path -Path $webWasmPath -PathType Leaf) {
+            Copy-Item -Path $webWasmPath -Destination ".." -ChildPath "tree_sitter_cangjie_web.wasm" -Force
+            Write-Host "✓ Copied Web WASM to main directory" -ForegroundColor Green
         }
         
         Write-Host "Tree-sitter parser built successfully!" -ForegroundColor Green
