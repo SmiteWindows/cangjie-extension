@@ -202,6 +202,23 @@ jobs:
         echo "WASI_SDK_PATH=/opt/wasi-sdk-21.0" >> $GITHUB_ENV
       shell: bash
 
+    - name: Install WASI SDK (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Install WASI SDK for Windows
+        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-21/wasi-sdk-21.0-mingw.tar.gz"
+        $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasi-sdk-$(Get-Random)"
+        New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+        $wasiSdkFile = Join-Path -Path $tempDir -ChildPath "wasi-sdk.tar.gz"
+        Invoke-WebRequest -Uri $wasiSdkUrl -OutFile $wasiSdkFile -UseBasicParsing
+        
+        # Extract using tar (available in Git Bash on Windows GitHub Actions)
+        bash -c "tar -xzf $wasiSdkFile -C $tempDir"
+        $wasiSdkDir = Get-ChildItem -Path $tempDir -Name "wasi-sdk-*" | Select-Object -First 1
+        $wasiSdkPath = Join-Path -Path $tempDir -ChildPath $wasiSdkDir
+        echo "WASI_SDK_PATH=$wasiSdkPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      shell: pwsh
+
     - name: Run Rust tests
       run: npm run test-rust
 
