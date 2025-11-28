@@ -4,13 +4,15 @@
   "type": "module",
   "description": "Cangjie language support for Zed editor",
   "scripts": {
-    "build": "npm run build-grammar && npm run build-wasm",
+    "build": "npm run build-grammar",
     "build-grammar": "node scripts/build-grammar.js",
-    "build-wasm": "cd tree-sitter-cangjie && npx tree-sitter build --wasm",
+    "build-wasm": "npm run build-grammar",
+    "build-wasm-rust": "cd tree-sitter-cangjie && cargo build --target wasm32-wasip2 --release",
+    "build-wasm-web": "cd tree-sitter-cangjie && cargo build --target wasm32-unknown-unknown --release",
     "generate": "cd tree-sitter-cangjie && npx tree-sitter generate",
     "test": "cd tree-sitter-cangjie && npx tree-sitter test",
     "test-rust": "cd tree-sitter-cangjie && cargo test",
-    "clean": "rm -rf tree-sitter-cangjie/src/parser.c tree-sitter-cangjie/src/parser.h tree-sitter-cangjie/src/tree_sitter/*.h"
+    "clean": "rm -rf tree-sitter-cangjie/src/parser.c tree-sitter-cangjie/src/parser.h tree-sitter-cangjie/src/tree_sitter/*.h tree-sitter-cangjie.wasm"
   },
   "devDependencies": {
     "tree-sitter-cli": "^0.25.0"

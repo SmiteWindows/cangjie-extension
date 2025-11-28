@@ -58,57 +58,49 @@ function buildTreeSitterGrammar() {
         stdio: "inherit",
       });
 
-      // 智能WASM构建
-      console.log("🌐 Attempting WASM build (optional)...");
+      // Rust WASM构建
+      console.log("🌐 Building Rust WASM...");
       
-      // 检查可用的构建工具
-      const hasEmcc = isCommandAvailable("emcc");
-      const hasDocker = isCommandAvailable("docker");
-      const hasPodman = isCommandAvailable("podman");
-      
-      if (hasEmcc) {
-        console.log("✅ Using emcc for WASM build");
-        try {
-          execSync("npx tree-sitter build --wasm", {
+      try {
+        // 检查Rust是否可用
+        if (isCommandAvailable("cargo")) {
+          console.log("✅ Using Rust for WASM build");
+          
+          // 构建WASI WASM (用于服务器端)
+          console.log("🔧 Building WASI WASM...");
+          execSync("cargo build --target wasm32-wasip2 --release", {
             cwd: grammarDir,
             stdio: "inherit",
           });
-          console.log("✅ WASM build completed successfully");
-        } catch (wasmError) {
-          console.error("❌ WASM build failed with emcc:", wasmError.message);
-          console.error("📝 Tip: Try updating emcc to the latest version");
-        }
-      } else if (hasDocker) {
-        console.log("🐳 Using Docker for WASM build");
-        try {
-          execSync(`docker run --rm -v "${grammarDir}:/src" emscripten/emsdk bash -c "cd /src && npx tree-sitter build --wasm"`, {
+          
+          // 复制WASI WASM到主目录
+          const wasiWasmPath = join(grammarDir, "target", "wasm32-wasip2", "release", "tree_sitter_cangjie.wasm");
+          if (existsSync(wasiWasmPath)) {
+            const destWasmPath = join(__dirname, "..", "tree-sitter-cangjie.wasm");
+            execSync(`cp "${wasiWasmPath}" "${destWasmPath}"`, {
+              stdio: "inherit"
+            });
+            console.log("✅ WASI WASM built successfully");
+          }
+          
+          // 构建Web WASM (用于浏览器)
+          console.log("🔧 Building Web WASM...");
+          execSync("cargo build --target wasm32-unknown-unknown --release", {
             cwd: grammarDir,
             stdio: "inherit",
           });
-          console.log("✅ WASM build completed successfully with Docker");
-        } catch (wasmError) {
-          console.error("❌ WASM build failed with Docker:", wasmError.message);
-          console.error("📝 Tip: Ensure Docker is running and you have permission to use it");
+          
+          console.log("✅ Rust WASM build completed successfully");
+        } else {
+          console.warn("⚠️  Skipping Rust WASM build: cargo not found");
+          console.warn("📝 To build Rust WASM, install Rust: https://www.rust-lang.org/tools/install");
+          console.warn("   Rust WASM build is optional and not required for basic functionality");
         }
-      } else if (hasPodman) {
-        console.log("🐋 Using Podman for WASM build");
-        try {
-          execSync(`podman run --rm -v "${grammarDir}:/src" emscripten/emsdk bash -c "cd /src && npx tree-sitter build --wasm"`, {
-            cwd: grammarDir,
-            stdio: "inherit",
-          });
-          console.log("✅ WASM build completed successfully with Podman");
-        } catch (wasmError) {
-          console.error("❌ WASM build failed with Podman:", wasmError.message);
-          console.error("📝 Tip: Ensure Podman is running and you have permission to use it");
-        }
-      } else {
-        console.warn("⚠️  Skipping WASM build: No suitable tools found");
-        console.warn("📝 To build WASM, install one of:");
-        console.warn("   - Emscripten SDK: https://emscripten.org/docs/getting_started/downloads.html");
-        console.warn("   - Docker: https://www.docker.com/get-started");
-        console.warn("   - Podman: https://podman.io/getting-started/installation");
-        console.warn("   WASM build is optional and not required for basic functionality");
+      } catch (wasmError) {
+        console.error("❌ Rust WASM build failed:", wasmError.message);
+        console.error("📝 Tip: Ensure Rust is installed and up-to-date");
+        console.error("   Run 'rustup update' to update Rust");
+        console.error("   Run 'rustup target add wasm32-wasip2 wasm32-unknown-unknown' to add WASM targets");
       }
     } else {
       console.error("❌ Error: tree-sitter-cangjie directory not found");
