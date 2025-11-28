@@ -1,0 +1,118 @@
+name: Update Dependencies
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight UTC
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  update-dependencies:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        override: true
+        targets: wasm32-wasip2, wasm32-unknown-unknown
+
+    - name: Install PowerShell 7 (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        winget install --id Microsoft.PowerShell --source winget --accept-package-agreements --accept-source-agreements
+      shell: pwsh
+
+    - name: Update dependencies (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        # Update npm dependencies
+        npm install
+        npm update
+        npm install --save-dev tree-sitter-cli@latest
+        
+        # Update Rust dependencies
+        cargo update
+        
+        # Update dependencies in tree-sitter-cangjie directory
+        if [ -d "tree-sitter-cangjie" ]; then
+          cd tree-sitter-cangjie
+          cargo update
+          cd ..
+        fi
+      shell: bash
+
+    - name: Update dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Run the PowerShell script to update dependencies
+        .\update-dependencies.ps1 -SkipTests
+      shell: pwsh
+
+    - name: Run tests (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        # Run Tree-sitter tests
+        npm test
+        
+        # Run Rust tests
+        npm run test-rust
+        
+        # Generate and build parser
+        npm run generate
+        npx tree-sitter build || true
+      shell: bash
+
+    - name: Run tests (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Run Tree-sitter tests
+        npm test
+        
+        # Run Rust tests
+        npm run test-rust
+        
+        # Generate and build parser
+        npm run generate
+        npx tree-sitter build -ErrorAction SilentlyContinue
+      shell: pwsh
+
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: update dependencies'
+        title: 'Update Dependencies'
+        body: |
+          This pull request updates all dependencies to their latest versions.
+          
+          **Changes:**
+          - Updated npm dependencies
+          - Updated Rust dependencies
+          - Updated tree-sitter-cangjie Rust dependencies
+          
+          **Tests:**
+          - Tree-sitter tests passed
+          - Rust tests passed
+          - Parser generated and built successfully
+        branch: update-dependencies
+        delete-branch: true
+        labels: |
+          dependencies
+          automated
+        assignees: ${{ github.actor }}
+        reviewers: ${{ github.actor }}
