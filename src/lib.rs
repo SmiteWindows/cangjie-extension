@@ -389,7 +389,7 @@ impl CangjieExtension {
     /// 
     /// # Returns
     /// * `Result<zed::Command, String>` - The command to start the LSP server or an error message
-    fn language_server_command(
+    fn create_language_server_command(
         &mut self,
         language_server_id: &zed::LanguageServerId,
         worktree: &zed::Worktree,
@@ -613,7 +613,7 @@ impl zed::Extension for CangjieExtension {
         language_server_id: &zed::LanguageServerId,
         worktree: &zed::Worktree,
     ) -> Result<zed::Command, String> {
-        self.language_server_command(language_server_id, worktree)
+        self.create_language_server_command(language_server_id, worktree)
     }
 
     /// Provides workspace configuration for the language server
