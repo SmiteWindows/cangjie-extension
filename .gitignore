@@ -75,3 +75,77 @@ yarn-error.log*
 # Submodules to ignore
 cangjie_test/
 grammars/cangjie/
+
+# Documentation directories
+cangjie_docs/
+历史文档/
+
+# Additional Rust build artifacts
+build/
+**/target/
+*.rlib
+*.so
+*.dylib
+
+# Additional test files
+**/test_*.cj
+**/tests/test_*.cj
+**/examples/*.cj
+
+# Additional IDE files
+*.code-workspace
+.vs/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Additional OS files
+.DS_Store
+Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Additional temporary files
+*.tmp
+*.temp
+.cache/
+.tmp/
+
+# Additional log files
+logs/
+*.log
+*.lck
+
+# Additional environment files
+.env.*
+!.env.example
+
+# Additional release artifacts
+*.deb
+*.rpm
+*.pkg
+*.dmg
+
+# Additional PowerShell files
+*.psd1
+*.psm1
+*.ps1xml
+*.cdxml
+
+# Additional Node.js files
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# Additional Tree-sitter files
+**/tree-sitter-*/src/parser.c
+**/tree-sitter-*/src/parser.h
+**/tree-sitter-*/src/scanner.c
+**/tree-sitter-*/src/scanner.cc
+**/tree-sitter-*/src/scanner.h
+**/tree-sitter-*/src/tree_sitter/
