@@ -21,8 +21,84 @@ Cangjie Extension 是为 Zed 编辑器提供的 Cangjie 编程语言支持扩展
 - Tree-sitter CLI（用于生成和构建语法解析器）
 - WASI SDK 29.0+（用于编译 WASM 模块）
 - Cangjie SDK 1.0.4+（用于开发和测试）
+- PowerShell 7.0+（用于运行项目提供的 PowerShell 脚本）
 
 ### 2.2 依赖安装
+
+### 2.3 PowerShell 7 配置
+
+项目中的 PowerShell 脚本都需要 PowerShell 7.0+ 才能运行。以下是安装和配置 PowerShell 7 的方法：
+
+#### 方法一：使用安装脚本（推荐）
+
+项目提供了一个 PowerShell 脚本，可以帮助您配置 PowerShell 7：
+
+**Windows**：
+```powershell
+# 运行 PowerShell 7 配置脚本
+.\update-ps1-scripts.ps1
+```
+
+**脚本功能**：
+- 检查所有 PowerShell 脚本是否包含 `#Requires -Version 7.0` 指令
+- 为缺少指令的脚本添加 `#Requires -Version 7.0` 指令
+- 确保所有脚本只能在 PowerShell 7 中运行
+
+#### 方法二：手动安装和配置
+
+**安装 PowerShell 7**：
+- 从 [Microsoft 官方网站](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows) 下载并安装 PowerShell 7
+- 或使用 Winget 安装：`winget install --id Microsoft.PowerShell`
+
+**配置 PowerShell 7**：
+
+1. **使用 pwsh 命令**：
+   ```powershell
+   # 使用 pwsh 命令而不是 powershell 命令
+   pwsh -ExecutionPolicy Bypass -File .\tree-sitter-tools.ps1 -Action help
+   ```
+
+2. **使用批处理包装器**：
+   项目提供了 `run-ps-script.bat` 批处理文件，确保使用 PowerShell 7：
+   ```powershell
+   .\run-ps-script.bat .\tree-sitter-tools.ps1 -Action help
+   ```
+
+3. **设置 PowerShell 配置文件**：
+   将以下内容添加到您的 PowerShell 配置文件（`$PROFILE`）中：
+   ```powershell
+   # Alias powershell to pwsh to ensure PowerShell 7 is used
+   alias powershell='pwsh'
+   ```
+
+#### 验证 PowerShell 7 配置
+
+要验证 PowerShell 7 是否正在使用：
+
+```powershell
+$PSVersionTable
+```
+
+预期输出：
+```
+Name                           Value
+----                           -----
+PSVersion                      7.5.4
+PSEdition                      Core
+GitCommitId                    7.5.4
+```
+
+#### 故障排除
+
+1. **错误："无法运行脚本，因为该脚本包含用于 Windows PowerShell 7.0 的 '#requires' 语句"**
+   - 这意味着您正在尝试使用 PowerShell 5.1 运行 PowerShell 7 脚本
+   - 解决方案：使用 `pwsh` 命令而不是 `powershell` 命令
+
+2. **错误："pwsh: The term 'pwsh' is not recognized"**
+   - 这意味着 PowerShell 7 没有安装
+   - 解决方案：从 Microsoft 官方网站下载并安装 PowerShell 7
+
+### 2.4 依赖安装
 
 #### 安装 Node.js 依赖
 ```bash
@@ -54,6 +130,16 @@ echo "export WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> ~/.bashrc  # 或 ~/.zshrc
 ```
 
 **Windows**（PowerShell）：
+
+##### 方法一：使用安装脚本（推荐）
+如果您已经下载并解压了 WASI SDK，可以使用项目提供的 PowerShell 脚本快速配置环境变量：
+
+```powershell
+# 运行 WASI SDK 配置脚本
+.\setup-wasi-sdk.ps1 -WasiSdkPath "D:\Downloads\wasi-sdk-29.0-x86_64-windows\wasi-sdk-29.0-x86_64-windows"    
+```
+
+##### 方法二：手动配置
 ```powershell
 # 下载 WASI SDK 29.0
 $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-mingw.tar.gz"
@@ -78,6 +164,28 @@ $env:WASI_SDK_PATH = $wasiSdkPath
 
 #### 安装 Cangjie SDK
 
+##### 方法一：使用安装脚本（推荐）
+
+项目提供了一个 PowerShell 脚本，可以自动下载、安装和配置 Cangjie SDK：
+
+**Windows**：
+```powershell
+# 运行 Cangjie SDK 安装脚本
+.\setup-cangjie-sdk.ps1
+
+# 或指定版本和安装路径
+.\setup-cangjie-sdk.ps1 -SdkVersion 1.0.4 -InstallPath "D:\Program Files\Cangjie"
+```
+
+**脚本功能**：
+- 自动下载指定版本的 Cangjie SDK
+- 安装到指定目录
+- 配置环境变量（`CANGJIE_HOME` 和 `PATH`）
+- 验证安装是否成功
+- 清理临时文件
+
+##### 方法二：手动安装
+
 **Linux/macOS**：
 ```bash
 curl -sSf https://cangjie-lang.cn/download/1.0.4 | sudo tar -xzf - -C /usr/local
@@ -87,6 +195,13 @@ curl -sSf https://cangjie-lang.cn/download/1.0.4 | sudo tar -xzf - -C /usr/local
 ```powershell
 Invoke-WebRequest -Uri https://cangjie-lang.cn/download/1.0.4 -OutFile cangjie-sdk.zip
 Expand-Archive -Path cangjie-sdk.zip -DestinationPath "C:\Program Files\Cangjie" -Force
+
+# 手动设置环境变量
+[Environment]::SetEnvironmentVariable("CANGJIE_HOME", "C:\Program Files\Cangjie", "User")
+$currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+[Environment]::SetEnvironmentVariable("PATH", "$currentPath;C:\Program Files\Cangjie\bin", "User")
+$env:CANGJIE_HOME = "C:\Program Files\Cangjie"
+$env:PATH += ";C:\Program Files\Cangjie\bin"
 ```
 
 ## 3. 项目配置文件
