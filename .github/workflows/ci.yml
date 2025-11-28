@@ -24,6 +24,11 @@ jobs:
       with:
         node-version: '18'
 
+    - name: Set up Emscripten
+      uses: mymindstorm/setup-emsdk@v11
+      with:
+        version: '3.1.45'
+
     - name: Install Cangjie SDK
       run: |
         Write-Host "Installing Cangjie SDK..."
