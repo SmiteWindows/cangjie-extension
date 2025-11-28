@@ -1,3 +1,5 @@
+#Requires -Version 7.0
+
 # Script to update all PS1 files to require PowerShell 7
 
 $ps1Files = Get-ChildItem -Path . -Filter "*.ps1" -Recurse | Where-Object { $_.Name -ne "update-ps1-scripts.ps1" }

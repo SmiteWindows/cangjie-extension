@@ -19,22 +19,31 @@ jobs:
         fetch-depth: 0
         fetch-tags: true
 
+
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
 
-    - name: Set up Emscripten
-      uses: mymindstorm/setup-emsdk@v11
-      with:
-        version: '3.1.45'
+
 
     - name: Install Cangjie SDK
       run: |
         Write-Host "Installing Cangjie SDK..."
         
         $sdkUrl = "https://cangjie-lang.cn/download/1.0.4"
-        $tempDir = Join-Path -Path $env:TEMP -ChildPath "cangjie-sdk-$(Get-Random)"
+        # Use the correct temporary directory variable based on the OS
+        if ($env:RUNNER_OS -eq "Windows") {
+            $tempPath = $env:TEMP
+        } else {
+            if ([string]::IsNullOrEmpty($env:TMPDIR)) {
+                $tempPath = "/tmp"
+            } else {
+                $tempPath = $env:TMPDIR
+            }
+        }
+        $tempDir = Join-Path -Path $tempPath -ChildPath "cangjie-sdk-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         
         try {

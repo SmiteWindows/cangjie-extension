@@ -1,3 +1,5 @@
+#Requires -Version 7.0
+
 # Simple script to validate PS1 files
 
 $ps1Files = Get-ChildItem -Path . -Filter "*.ps1" -Recurse | Sort-Object Name

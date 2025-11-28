@@ -31,11 +31,7 @@ jobs:
         override: true
         targets: wasm32-wasip2, wasm32-unknown-unknown
 
-    - name: Install PowerShell 7 (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        winget install --id Microsoft.PowerShell --source winget --accept-package-agreements --accept-source-agreements
-      shell: pwsh
+    
 
     - name: Update dependencies (Linux/macOS)
       if: runner.os != 'Windows'
