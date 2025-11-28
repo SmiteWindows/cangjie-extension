@@ -31,8 +31,6 @@ jobs:
         override: true
         targets: wasm32-wasip2, wasm32-unknown-unknown
 
-    
-
     - name: Update dependencies (Linux/macOS)
       if: runner.os != 'Windows'
       run: |
