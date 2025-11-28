@@ -2666,7 +2666,7 @@
       "members": [
         {
           "type": "PREC_RIGHT",
-          "value": 14,
+          "value": 4,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2696,7 +2696,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 13,
+          "value": 5,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2739,7 +2739,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 12,
+          "value": 6,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2778,7 +2778,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 11,
+          "value": 7,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2817,7 +2817,7 @@
       "members": [
         {
           "type": "PREC",
-          "value": 10,
+          "value": 9,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2864,7 +2864,7 @@
       "members": [
         {
           "type": "PREC",
-          "value": 9,
+          "value": 10,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2903,7 +2903,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 8,
+          "value": 11,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2933,7 +2933,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 7,
+          "value": 12,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2963,7 +2963,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 6,
+          "value": 13,
           "content": {
             "type": "SEQ",
             "members": [
@@ -2993,7 +2993,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 5,
+          "value": 14,
           "content": {
             "type": "SEQ",
             "members": [
@@ -3023,7 +3023,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 4,
+          "value": 15,
           "content": {
             "type": "SEQ",
             "members": [
@@ -3052,8 +3052,8 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "PREC_LEFT",
-          "value": 3,
+          "type": "PREC_RIGHT",
+          "value": 16,
           "content": {
             "type": "SEQ",
             "members": [
@@ -3083,7 +3083,7 @@
       "members": [
         {
           "type": "PREC_LEFT",
-          "value": 2,
+          "value": 17,
           "content": {
             "type": "SEQ",
             "members": [
@@ -3122,7 +3122,7 @@
       "members": [
         {
           "type": "PREC_RIGHT",
-          "value": 1,
+          "value": 18,
           "content": {
             "type": "SEQ",
             "members": [

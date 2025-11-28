@@ -7,8 +7,7 @@
       "title": "Cangjie",
       "scope": "source.cangjie",
       "file-types": [
-        "cj",
-        "cangjie"
+        "cj"
       ],
       "injection-regex": "^cangjie$",
       "class-name": "TreeSitterCangjie"
@@ -31,6 +30,9 @@
   "bindings": {
     "c": true,
     "node": true,
-    "rust": true
+    "rust": true,
+    "swift": true,
+    "python": true,
+    "go": true
   }
 }

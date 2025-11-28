@@ -522,7 +522,7 @@ module.exports = grammar({
     
     // 幂运算表达式（right associative）
     exponentiation_expression: $ => choice(
-      prec.right(14, seq(
+      prec.right(4, seq(
         $.unary_expression,
         '**',
         $.exponentiation_expression
@@ -532,7 +532,7 @@ module.exports = grammar({
     
     // 乘法表达式（left associative）
     multiplicative_expression: $ => choice(
-      prec.left(13, seq(
+      prec.left(5, seq(
         $.exponentiation_expression,
         choice('*', '/', '%'),
         $.multiplicative_expression
@@ -542,7 +542,7 @@ module.exports = grammar({
     
     // 加法表达式（left associative）
     additive_expression: $ => choice(
-      prec.left(12, seq(
+      prec.left(6, seq(
         $.multiplicative_expression,
         choice('+', '-'),
         $.additive_expression
@@ -552,7 +552,7 @@ module.exports = grammar({
     
     // 位移表达式（left associative）
     bitwise_shift_expression: $ => choice(
-      prec.left(11, seq(
+      prec.left(7, seq(
         $.additive_expression,
         choice('<<', '>>'),
         $.bitwise_shift_expression
@@ -562,7 +562,7 @@ module.exports = grammar({
     
     // 关系表达式（non-associative）
     relational_expression: $ => choice(
-      prec(10, seq(
+      prec(9, seq(
         $.bitwise_shift_expression,
         choice('<', '<=', '>', '>='),
         $.bitwise_shift_expression
@@ -572,7 +572,7 @@ module.exports = grammar({
     
     // 相等性表达式（non-associative）
     equality_expression: $ => choice(
-      prec(9, seq(
+      prec(10, seq(
         $.relational_expression,
         choice('==', '!='),
         $.relational_expression
@@ -582,7 +582,7 @@ module.exports = grammar({
     
     // 位与表达式（left associative）
     bitwise_and_expression: $ => choice(
-      prec.left(8, seq(
+      prec.left(11, seq(
         $.equality_expression,
         '&',
         $.bitwise_and_expression
@@ -592,7 +592,7 @@ module.exports = grammar({
     
     // 位异或表达式（left associative）
     bitwise_xor_expression: $ => choice(
-      prec.left(7, seq(
+      prec.left(12, seq(
         $.bitwise_and_expression,
         '^',
         $.bitwise_xor_expression
@@ -602,7 +602,7 @@ module.exports = grammar({
     
     // 位或表达式（left associative）
     bitwise_or_expression: $ => choice(
-      prec.left(6, seq(
+      prec.left(13, seq(
         $.bitwise_xor_expression,
         '|',
         $.bitwise_or_expression
@@ -612,7 +612,7 @@ module.exports = grammar({
     
     // 逻辑与表达式（left associative）
     logical_and_expression: $ => choice(
-      prec.left(5, seq(
+      prec.left(14, seq(
         $.bitwise_or_expression,
         '&&',
         $.logical_and_expression
@@ -622,7 +622,7 @@ module.exports = grammar({
     
     // 逻辑或表达式（left associative）
     logical_or_expression: $ => choice(
-      prec.left(4, seq(
+      prec.left(15, seq(
         $.logical_and_expression,
         '||',
         $.logical_or_expression
@@ -630,9 +630,9 @@ module.exports = grammar({
       $.logical_and_expression
     ),
     
-    // 空合并表达式（left associative）
+    // 空合并表达式（right associative）
     coalescing_expression: $ => choice(
-      prec.left(3, seq(
+      prec.right(16, seq(
         $.logical_or_expression,
         '??',
         $.coalescing_expression
@@ -642,7 +642,7 @@ module.exports = grammar({
     
     // 流表达式（left associative）
     flow_expression: $ => choice(
-      prec.left(2, seq(
+      prec.left(17, seq(
         $.coalescing_expression,
         choice('|>', '~>'),
         $.flow_expression
@@ -652,7 +652,7 @@ module.exports = grammar({
     
     // 赋值表达式（最低优先级，右结合）
     assignment_expression: $ => choice(
-      prec.right(1, seq(
+      prec.right(18, seq(
         $.flow_expression,
         choice('=', '**=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=', '&&=', '||='),
         $.assignment_expression

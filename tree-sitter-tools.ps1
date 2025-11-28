@@ -217,20 +217,21 @@ function Copy-TestFiles {
             $randomFiles = $allCjFiles | Get-Random -Count $Count
             $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
             
-            # Use PowerShell 7 parallel processing for faster copying
-            $results = $randomFiles | ForEach-Object -Parallel {
-                $file = $_
-                $counter = [ref]::new(0)
-                $local:counter.Value++
-                $newName = "test_${using:timestamp}_$($local:counter.Value).cj"
-                $destPath = Join-Path $using:dir $newName
+            # Use sequential processing to ensure unique filenames
+            $counter = 1
+            $results = @()
+            foreach ($file in $randomFiles) {
+                $newName = "test_${timestamp}_$($counter).cj"
+                $destPath = Join-Path $dir $newName
                 
                 try {
                     Copy-Item -Path $file -Destination $destPath -Force
-                    [PSCustomObject]@{ Success = $true; File = $file; Dest = $destPath }
+                    $results += [PSCustomObject]@{ Success = $true; File = $file; Dest = $destPath }
                 } catch {
-                    [PSCustomObject]@{ Success = $false; File = $file; Dest = $destPath; Error = $_ }
+                    $results += [PSCustomObject]@{ Success = $false; File = $file; Dest = $destPath; Error = $_ }
                 }
+                
+                $counter++
             }
             
             # Calculate results
