@@ -20,6 +20,13 @@
 
 use tree_sitter_language::LanguageFn;
 
+// 添加wasm-bindgen支持
+#[cfg(feature = "wasm")]
+extern crate wasm_bindgen;
+
+#[cfg(feature = "wasm")]
+use wasm_bindgen::prelude::*;
+
 extern "C" {
     fn tree_sitter_cangjie() -> *const ();
 }
@@ -38,6 +45,19 @@ pub const NODE_TYPES: &str = include_str!("../../src/node-types.json");
 // pub const INJECTIONS_QUERY: &str = include_str!("../../queries/injections.scm");
 // pub const LOCALS_QUERY: &str = include_str!("../../queries/locals.scm");
 // pub const TAGS_QUERY: &str = include_str!("../../queries/tags.scm");
+
+// 添加wasm-bindgen导出，以便在JavaScript中使用
+#[cfg(feature = "wasm")]
+#[wasm_bindgen]
+pub fn tree_sitter_cangjie_wasm() -> *const () {
+    unsafe { tree_sitter_cangjie() }
+}
+
+#[cfg(feature = "wasm")]
+#[wasm_bindgen]
+pub fn get_language() -> *const () {
+    unsafe { tree_sitter_cangjie() }
+}
 
 #[cfg(test)]
 mod tests {

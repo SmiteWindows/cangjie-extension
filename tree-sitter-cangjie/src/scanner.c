@@ -116,7 +116,7 @@ bool tree_sitter_cangjie_external_scanner_scan(void *payload, TSLexer *lexer, co
     }
     
     // Skip comments and empty lines
-    if (lexer->lookahead == '/' && lexer->get_column(lexer) == indent) {
+    if (lexer->lookahead == '/' && lexer->get_column(lexer) == (uint32_t)indent) {
       // This is a comment, skip it
       scanner->at_line_start = false;
       return false;

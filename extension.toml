@@ -15,9 +15,8 @@ file_types = ["cj"]
 
 # 语法分析器配置
 [grammars.cangjie]
-path = "tree-sitter-cangjie"
+path = "tree-sitter-cangjie.wasm"
 scope = "source.cangjie"
-file_types = ["cj"]
 
 # 语言服务器配置
 [language_servers.cangjie-lsp]

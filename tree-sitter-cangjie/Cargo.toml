@@ -23,9 +23,17 @@ include = [
 
 [lib]
 path = "bindings/rust/lib.rs"
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 tree-sitter-language = "0.1"
+wasm-bindgen = { version = "0.2", optional = true }
+
+[features]
+default = []
+wasm = ["wasm-bindgen"]
+
+
 
 [build-dependencies]
 cc = "1.2"
