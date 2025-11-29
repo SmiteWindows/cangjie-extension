@@ -4,6 +4,8 @@
       "settings": {
         "cangjie": {
           "sdkPath": "D:\\cangjie",
+          "lspPathOverride": null,
+          "cjpmPathOverride": null,
           "enableSemanticHighlighting": true,
           "maxFileSize": 1000000,
           "checkOnSave": true
