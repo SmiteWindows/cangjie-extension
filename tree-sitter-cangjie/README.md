@@ -29,7 +29,7 @@ npm install tree-sitter-cangjie
 ```toml
 [dependencies]
 tree-sitter = "^0.25.0"
-tree-sitter-cangjie = { git = "https://github.com/SmiteWindows/cangjie-extension" }
+tree-sitter-cangjie = { git = "https://github.com/SmiteWindows/tree-sitter-cangjie", branch = "main" }
 ```
 
 ### For Python
@@ -41,7 +41,7 @@ pip install tree-sitter-cangjie
 ### For Go
 
 ```bash
-go get github.com/SmiteWindows/cangjie-extension/tree-sitter-cangjie
+go get github.com/SmiteWindows/tree-sitter-cangjie
 ```
 
 ## Usage
@@ -58,7 +58,7 @@ Add the following to your `init.lua`:
 local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
 parser_config.cangjie = {
   install_info = {
-    url = "https://github.com/SmiteWindows/cangjie-extension",
+    url = "https://github.com/SmiteWindows/tree-sitter-cangjie",
     files = { "src/parser.c", "src/scanner.c" },
     branch = "main",
   },
@@ -83,11 +83,12 @@ Refer to your editor's documentation for information on how to use Tree-sitter g
 The grammar can be compiled to WebAssembly for use in web applications:
 
 ```javascript
-import { LANGUAGE } from './tree-sitter-cangjie.wasm';
+const Parser = require('tree-sitter');
+const Cangjie = require('./tree-sitter-cangjie.wasm');
 
-// Use the language in your web application
+// Use the language in your application
 const parser = new Parser();
-parser.setLanguage(LANGUAGE);
+parser.setLanguage(Cangjie);
 const tree = parser.parse("fn main() { println(\"Hello, world!\"); }", null);
 ```
 
@@ -99,7 +100,7 @@ const tree = parser.parse("fn main() { println(\"Hello, world!\"); }", null);
 - npm
 - tree-sitter-cli
 - Rust (for WASM build)
-- wasm-pack (for WASM build)
+- wasm-pack (for WASM build, will be installed via cargo if not present)
 
 ### Installation
 
@@ -112,7 +113,7 @@ npm install
 #### Generate Parser
 
 ```bash
-tree-sitter generate
+npm run generate
 ```
 
 #### Build for Node.js
@@ -124,11 +125,14 @@ npm run build
 #### Build for WebAssembly
 
 ```bash
-# Build for web target
-wasm-pack build --target web --release
+# Build all WASM targets
+npm run build-wasm
 
-# Build for node target
-wasm-pack build --target nodejs --release
+# Build for web target
+npm run build-wasm-web
+
+# Build for WASI target
+npm run build-wasm-rust
 ```
 
 #### Build with Rust
@@ -146,19 +150,19 @@ cargo build --target wasm32-unknown-unknown --release
 #### Run Tree-sitter Tests
 
 ```bash
-tree-sitter test
+npm run test
 ```
 
 #### Run Rust Tests
 
 ```bash
-cargo test
+npm run test-rust
 ```
 
 #### Run JavaScript Tests
 
 ```bash
-npm test
+npm run test:node
 ```
 
 ### Running the Playground
@@ -166,6 +170,20 @@ npm test
 ```bash
 npm start
 ```
+
+### Available Scripts
+
+* `npm run build` - Build the extension
+* `npm run build-grammar` - Build the Tree-sitter grammar
+* `npm run build-wasm` - Build all WASM targets
+* `npm run build-wasm-web` - Build WASM for web target
+* `npm run build-wasm-rust` - Build WASM for WASI target
+* `npm run generate` - Generate the Tree-sitter parser
+* `npm run test` - Run Tree-sitter tests
+* `npm run test-rust` - Run Rust tests
+* `npm run test:node` - Run Node.js tests
+* `npm run clean` - Clean generated files
+* `npm start` - Start Tree-sitter playground
 
 ## Contributing
 
@@ -182,7 +200,10 @@ MIT
 ## Links
 
 - [Cangjie Extension for Zed](https://github.com/SmiteWindows/cangjie-extension)
-- [Cangjie Language Documentation](https://cangjie-lang.org/docs)
 - [Tree-sitter Documentation](https://tree-sitter.github.io/tree-sitter/)
 - [WebAssembly Documentation](https://webassembly.org/docs/)
 - [Zed Editor](https://zed.dev/)
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a list of changes in each version.

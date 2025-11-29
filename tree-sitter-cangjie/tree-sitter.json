@@ -24,7 +24,7 @@
       }
     ],
     "links": {
-      "repository": "https://github.com/SmiteWindows/cangjie-extension"
+      "repository": "https://github.com/SmiteWindows/tree-sitter-cangjie"
     }
   },
   "bindings": {

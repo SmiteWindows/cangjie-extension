@@ -5955,11 +5955,6 @@
       "macro_invocation"
     ],
     [
-      "binding_pattern",
-      "enum_pattern",
-      "identifier_expression"
-    ],
-    [
       "constant_pattern",
       "primary_expression"
     ],
@@ -5968,12 +5963,12 @@
       "macro_argument"
     ],
     [
-      "binding_pattern",
-      "named_argument"
-    ],
-    [
       "identifier_expression",
       "lambda_parameter"
+    ],
+    [
+      "binding_pattern",
+      "named_argument"
     ],
     [
       "variable_declaration",

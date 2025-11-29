@@ -2,7 +2,7 @@
   "name": "tree-sitter-cangjie",
   "version": "0.1.0",
   "description": "Cangjie language grammar for tree-sitter",
-  "repository": "https://github.com/SmiteWindows/cangjie-extension",
+  "repository": "https://github.com/SmiteWindows/cangjie-extension/tree/main/tree-sitter-cangjie",
   "license": "MIT",
   "author": {
     "name": "SmiteWindows",
@@ -45,9 +45,17 @@
   },
   "scripts": {
     "install": "node-gyp-build",
+    "build": "npm run build-grammar",
+    "build-grammar": "node scripts/build-grammar.js",
+    "build-wasm": "node scripts/build-grammar.js --only-wasm",
+    "build-wasm-rust": "cargo build --target wasm32-wasip2 --release",
+    "build-wasm-web": "cargo build --target wasm32-unknown-unknown --release",
+    "generate": "npx tree-sitter generate",
+    "test": "npx tree-sitter test",
+    "test-rust": "cargo test",
+    "clean": "rm -rf src/parser.c src/parser.h src/tree_sitter tree-sitter-cangjie.wasm pkg/ || true",
     "prestart": "tree-sitter build --wasm",
     "start": "tree-sitter playground",
-    "test": "tree-sitter test",
     "test:node": "node --test bindings/node/*_test.js"
   }
 }

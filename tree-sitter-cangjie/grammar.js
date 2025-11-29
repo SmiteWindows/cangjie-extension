@@ -24,16 +24,14 @@ module.exports = grammar({
     [$.pattern, $.type_pattern],
     // @ 后面跟着标识符和括号时，既可以作为注解也可以作为宏调用，需要处理冲突
     [$.annotation, $.macro_invocation],
-    // @ 后面跟着标识符和括号内的标识符时，既可以作为绑定模式、枚举模式也可以作为标识符表达式，需要处理冲突
-    [$.binding_pattern, $.enum_pattern, $.identifier_expression],
     // @ 后面跟着标识符和括号内的字面量时，既可以作为常量模式也可以作为主表达式，需要处理冲突
     [$.constant_pattern, $.primary_expression],
     // @ 后面跟着标识符和括号内的表达式时，既可以作为注解也可以作为宏参数，需要处理冲突
     [$.annotation, $.macro_argument],
-    // @ 后面跟着标识符和括号内的标识符后面跟着 : 时，既可以作为绑定模式也可以作为命名参数，需要处理冲突
-    [$.binding_pattern, $.named_argument],
     // @ 后面跟着标识符和括号内的 { ( identifier 时，既可以作为标识符表达式也可以作为lambda参数，需要处理冲突
     [$.identifier_expression, $.lambda_parameter],
+    // @ 后面跟着标识符和括号内的 { ( identifier 时，既可以作为绑定模式也可以作为命名参数，需要处理冲突
+    [$.binding_pattern, $.named_argument],
     // let 后面跟着类型标识符和 { 时，既可以作为变量声明也可以作为结构体模式，需要处理冲突
     [$.variable_declaration, $.struct_pattern],
     // 注解中标识符既可以作为绑定模式也可以作为标识符表达式，需要处理冲突
