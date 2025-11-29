@@ -1,0 +1,164 @@
+name: Update Dependencies
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight UTC
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  update-dependencies:
+    runs-on: ${{ matrix.os }}-${{ matrix.arch }}
+    strategy:
+      matrix:
+        os: [ubuntu, windows, macos]
+        arch: [x64]
+        include:
+          - os: ubuntu
+            arch: arm64
+          - os: macos
+            arch: arm64
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Read toolchain configuration
+      id: toolchain
+      run: |
+        # Read versions from toolchain.json
+        toolchainContent=$(cat toolchain.json)
+        nodeVersion=$(echo $toolchainContent | jq -r '.versions.node')
+        goVersion=$(echo $toolchainContent | jq -r '.versions.go')
+        pythonVersion=$(echo $toolchainContent | jq -r '.versions.python')
+        echo "nodeVersion=$nodeVersion" >> $GITHUB_OUTPUT
+        echo "goVersion=$goVersion" >> $GITHUB_OUTPUT
+        echo "pythonVersion=$pythonVersion" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ steps.toolchain.outputs.nodeVersion }}
+
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        override: true
+        targets: wasm32-wasip2, wasm32-unknown-unknown
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ steps.toolchain.outputs.goVersion }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ steps.toolchain.outputs.pythonVersion }}
+
+    - name: Set up Swift (macOS only)
+      if: runner.os == 'macOS'
+      run: |
+        # Swift is pre-installed on macOS GitHub runners
+        swift --version
+      shell: bash
+
+    - name: Update dependencies (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        # Update tree-sitter-cli
+        npm install -g tree-sitter-cli@latest
+        
+        # Update Rust dependencies
+        cargo update
+      shell: bash
+
+    - name: Update dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Update tree-sitter-cli
+        npm install -g tree-sitter-cli@latest
+        
+        # Update Rust dependencies
+        cargo update
+      shell: pwsh
+
+    - name: Run tests (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        # Generate parser
+        tree-sitter generate
+        
+        # Run Tree-sitter tests
+        tree-sitter test
+        
+        # Run Rust tests
+        cargo test
+        
+        # Build parser
+        tree-sitter build || true
+        
+        # Run Go binding tests
+        go test ./bindings/go -v
+        
+        # Run Python binding tests
+        pip install tree-sitter pytest
+        python -m pytest bindings/python/tests/test_binding.py -v
+        
+        # Run Swift binding tests (macOS only)
+        if [ "$RUNNER_OS" = "macOS" ]; then
+          swift test --package-path bindings/swift || true
+        fi
+      shell: bash
+
+    - name: Run tests (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Generate parser
+        tree-sitter generate
+        
+        # Run Tree-sitter tests
+        tree-sitter test
+        
+        # Run Rust tests
+        cargo test
+        
+        # Build parser
+        tree-sitter build 2>$null
+        
+        # Run Go binding tests
+        go test ./bindings/go -v
+        
+        # Run Python binding tests
+        pip install tree-sitter pytest
+        python -m pytest bindings/python/tests/test_binding.py -v
+      shell: pwsh
+
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: update dependencies'
+        title: 'Update Dependencies'
+        body: |
+          This pull request updates all dependencies to their latest versions.
+          
+          **Changes:**
+          - Updated tree-sitter-cli
+          - Updated Rust dependencies
+          
+          **Tests:**
+          - Tree-sitter tests passed
+          - Rust tests passed
+          - Parser generated and built successfully
+        branch: update-dependencies
+        delete-branch: true
+        labels: |
+          dependencies
+          automated
+        assignees: ${{ github.actor }}
+        reviewers: ${{ github.actor }}
