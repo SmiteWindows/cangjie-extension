@@ -53,4 +53,7 @@ fn main() {
 
     // 编译 parser.c 和 scanner.c
     c_config.compile("tree-sitter-cangjie");
+    // 监视相关文件变化
+    println!("cargo:rerun-if-changed=src/");
+    println!("cargo:rerun-if-changed=tree-sitter-cangjie/");
 }
