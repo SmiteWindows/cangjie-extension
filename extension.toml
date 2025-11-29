@@ -17,6 +17,7 @@ file_types = ["cj"]
 [grammars.cangjie]
 path = "tree-sitter-cangjie.wasm"
 scope = "source.cangjie"
+repository = "https://github.com/SmiteWindows/cangjie-extension"
 
 # 语言服务器配置
 [language_servers.cangjie-lsp]
