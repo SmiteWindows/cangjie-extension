@@ -8,12 +8,75 @@
           "cjpmPathOverride": null,
           "enableSemanticHighlighting": true,
           "maxFileSize": 1000000,
-          "checkOnSave": true
+          "checkOnSave": true,
+          "enableDebugLogging": false,
+          "formatOnSave": true,
+          "enableCodeLens": true,
+          "enableRefactoring": true,
+          "enableCompletionSnippets": true,
+          "enableSignatureHelp": true,
+          "enableHoverDocumentation": true,
+          "enableDefinitionSupport": true,
+          "enableReferencesSupport": true,
+          "enableRenameSupport": true,
+          "enableDocumentSymbolSupport": true,
+          "enableWorkspaceSymbolSupport": true,
+          "enableDocumentHighlightSupport": true,
+          "enableCodeActionSupport": true,
+          "enableFoldingRangeSupport": true,
+          "enableSelectionRangeSupport": true,
+          "enableLinkedEditingRangeSupport": true,
+          "enableColorProviderSupport": true,
+          "enableDocumentFormattingSupport": true,
+          "enableDocumentRangeFormattingSupport": true,
+          "enableOnTypeFormattingSupport": true,
+          "enableDeclarationSupport": true,
+          "enableImplementationSupport": true,
+          "enableTypeDefinitionSupport": true,
+          "enableCallHierarchySupport": true,
+          "enableInlayHintsSupport": true,
+          "enableDiagnosticsSupport": true
         }
       }
     }
   },
   "file_types": {
     "Cangjie": ["cj"]
+  },
+  "languages": {
+    "Cangjie": {
+      "indent": {
+        "tab_size": 4,
+        "use_tabs": false
+      },
+      "comments": {
+        "line_comment": "//",
+        "block_comment": ["/*", "*/"]
+      },
+      "brackets": [
+        {
+          "start": "{",
+          "end": "}",
+          "close": true,
+          "newline": true
+        },
+        {
+          "start": "[",
+          "end": "]",
+          "close": true,
+          "newline": false
+        },
+        {
+          "start": "(",
+          "end": ")",
+          "close": true,
+          "newline": false
+        }
+      ],
+      "grammar": {
+        "name": "cangjie",
+        "path": "./tree-sitter-cangjie.wasm"
+      }
+    }
   }
 }

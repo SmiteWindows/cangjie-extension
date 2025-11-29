@@ -9,6 +9,7 @@
     "go": "1.22",
     "python": "3.12",
     "wasiSdk": "29.0",
+    "wasmtime": "20.0.0",
     "treeSitterCli": "^0.25.10"
   },
   "githubActions": {

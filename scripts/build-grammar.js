@@ -115,11 +115,24 @@ wasm-bindgen = "0.2"
             // 使用wasm-pack生成WASM文件，启用wasm特性
             // 设置环境变量，确保wasm-pack能够找到wasi-sdk
             const env = { ...process.env };
-            // 如果没有设置WASI_SDK_PATH，设置默认值
+            // 如果没有设置WASI_SDK_PATH，从toolchain.json读取版本并设置默认值
             if (!env.WASI_SDK_PATH) {
+              let wasiSdkVersion = "29.0";
+              try {
+                const toolchainPath = path.join(__dirname, "..", "toolchain.json");
+                if (fs.existsSync(toolchainPath)) {
+                  const toolchainContent = fs.readFileSync(toolchainPath, "utf8");
+                  const toolchain = JSON.parse(toolchainContent);
+                  if (toolchain.versions && toolchain.versions.wasiSdk) {
+                    wasiSdkVersion = toolchain.versions.wasiSdk;
+                  }
+                }
+              } catch (error) {
+                console.warn("⚠️  Failed to read wasiSdk version from toolchain.json, using default:", error.message);
+              }
               env.WASI_SDK_PATH = process.platform === "win32" 
-                ? "C:/opt/wasi-sdk-30.0" 
-                : "/opt/wasi-sdk-30.0";
+                ? `C:/opt/wasi-sdk-${wasiSdkVersion}` 
+                : `/opt/wasi-sdk-${wasiSdkVersion}`;
             }
             
             // 使用环境变量禁用wasm-opt，避免下载binaryen

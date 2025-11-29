@@ -46,28 +46,28 @@ jobs:
         if [ "$RUNNER_OS" == "Linux" ]; then
           if [ "$RUNNER_ARCH" == "x64" ]; then
             # For Linux x86_64
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-x86_64-linux.tar.gz | tar -xzf - -C /opt
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-x86_64-linux.tar.gz | tar -xzf - -C /opt
           elif [ "$RUNNER_ARCH" == "arm64" ]; then
             # For Linux arm64
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-aarch64-linux.tar.gz | tar -xzf - -C /opt
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-aarch64-linux.tar.gz | tar -xzf - -C /opt
           fi
         elif [ "$RUNNER_OS" == "macOS" ]; then
           if [ "$RUNNER_ARCH" == "x64" ]; then
             # For macOS x86_64
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-x86_64-macos.tar.gz | tar -xzf - -C /opt
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-x86_64-macos.tar.gz | tar -xzf - -C /opt
           elif [ "$RUNNER_ARCH" == "arm64" ]; then
             # For macOS arm64
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-aarch64-macos.tar.gz | tar -xzf - -C /opt
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-aarch64-macos.tar.gz | tar -xzf - -C /opt
           fi
         fi
-        echo "WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> $GITHUB_ENV
+        echo "WASI_SDK_PATH=/opt/wasi-sdk-30.0" >> $GITHUB_ENV
       shell: bash
 
     - name: Install WASI SDK (Windows)
       if: runner.os == 'Windows'
       run: |
         # Install WASI SDK for Windows
-        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-mingw.tar.gz"
+        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-mingw.tar.gz"
         $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasi-sdk-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         $wasiSdkFile = Join-Path -Path $tempDir -ChildPath "wasi-sdk.tar.gz"
@@ -100,7 +100,13 @@ jobs:
     - name: Install Wasmtime (Windows)
       if: runner.os == 'Windows'
       run: |
-        $wasmtimeUrl = "https://github.com/bytecodealliance/wasmtime/releases/download/v20.0.0/wasmtime-v20.0.0-x86_64-windows.zip"
+        # Read wasmtime version from toolchain.json
+        $toolchainPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath "toolchain.json"
+        $toolchainContent = Get-Content -Path $toolchainPath -Raw -Encoding utf8
+        $toolchain = ConvertFrom-Json -InputObject $toolchainContent
+        $wasmtimeVersion = $toolchain.versions.wasmtime
+        
+        $wasmtimeUrl = "https://github.com/bytecodealliance/wasmtime/releases/download/v${wasmtimeVersion}/wasmtime-v${wasmtimeVersion}-x86_64-windows.zip"
         $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasmtime-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         $wasmtimeFile = Join-Path -Path $tempDir -ChildPath "wasmtime.zip"
@@ -109,6 +115,7 @@ jobs:
         Expand-Archive -Path $wasmtimeFile -DestinationPath $tempDir -Force
         $wasmtimeDir = Get-ChildItem -Path $tempDir -Name "wasmtime-*" | Select-Object -First 1
         $wasmtimePath = Join-Path -Path $tempDir -ChildPath $wasmtimeDir
+        
         echo "$wasmtimePath" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
       shell: pwsh
 
@@ -170,28 +177,28 @@ jobs:
         if [ "$RUNNER_OS" == "Linux" ]; then
           if [ "$RUNNER_ARCH" == "x64" ]; then
             # For Linux x86_64
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-x86_64-linux.tar.gz | tar -xzf - -C /opt
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-x86_64-linux.tar.gz | tar -xzf - -C /opt
           elif [ "$RUNNER_ARCH" == "arm64" ]; then
             # For Linux arm64
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-aarch64-linux.tar.gz | tar -xzf - -C /opt
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-aarch64-linux.tar.gz | tar -xzf - -C /opt
           fi
         elif [ "$RUNNER_OS" == "macOS" ]; then
           if [ "$RUNNER_ARCH" == "x64" ]; then
             # For macOS x86_64
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-x86_64-macos.tar.gz | tar -xzf - -C /opt
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-x86_64-macos.tar.gz | tar -xzf - -C /opt
           elif [ "$RUNNER_ARCH" == "arm64" ]; then
             # For macOS arm64
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-aarch64-macos.tar.gz | tar -xzf - -C /opt
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-aarch64-macos.tar.gz | tar -xzf - -C /opt
           fi
         fi
-        echo "WASI_SDK_PATH=/opt/wasi-sdk-29.0" >> $GITHUB_ENV
+        echo "WASI_SDK_PATH=/opt/wasi-sdk-30.0" >> $GITHUB_ENV
       shell: bash
 
     - name: Install WASI SDK (Windows)
       if: runner.os == 'Windows'
       run: |
         # Install WASI SDK for Windows
-        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-mingw.tar.gz"
+        $wasiSdkUrl = "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-30/wasi-sdk-30.0-mingw.tar.gz"
         $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasi-sdk-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         $wasiSdkFile = Join-Path -Path $tempDir -ChildPath "wasi-sdk.tar.gz"
@@ -224,7 +231,13 @@ jobs:
     - name: Install Wasmtime (Windows)
       if: runner.os == 'Windows'
       run: |
-        $wasmtimeUrl = "https://github.com/bytecodealliance/wasmtime/releases/download/v20.0.0/wasmtime-v20.0.0-x86_64-windows.zip"
+        # Read wasmtime version from toolchain.json
+        $toolchainPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath "toolchain.json"
+        $toolchainContent = Get-Content -Path $toolchainPath -Raw -Encoding utf8
+        $toolchain = ConvertFrom-Json -InputObject $toolchainContent
+        $wasmtimeVersion = $toolchain.versions.wasmtime
+        
+        $wasmtimeUrl = "https://github.com/bytecodealliance/wasmtime/releases/download/v${wasmtimeVersion}/wasmtime-v${wasmtimeVersion}-x86_64-windows.zip"
         $tempDir = Join-Path -Path $env:TEMP -ChildPath "wasmtime-$(Get-Random)"
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
         $wasmtimeFile = Join-Path -Path $tempDir -ChildPath "wasmtime.zip"

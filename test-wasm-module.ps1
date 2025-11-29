@@ -49,7 +49,12 @@ if ($Help) {
 
 # Constants
 $WASMTIME_RELEASES_URL = "https://github.com/bytecodealliance/wasmtime/releases"
-$WASMTIME_LATEST_VERSION = "v18.0.0"
+
+# 从toolchain.json读取Wasmtime版本
+$toolchainPath = Join-Path -Path $PSScriptRoot -ChildPath "toolchain.json"
+$toolchainContent = Get-Content -Path $toolchainPath -Raw -Encoding utf8
+$toolchain = ConvertFrom-Json -InputObject $toolchainContent
+$WASMTIME_LATEST_VERSION = "v$($toolchain.versions.wasmtime)"
 
 
 # Function to check if wasmtime is installed

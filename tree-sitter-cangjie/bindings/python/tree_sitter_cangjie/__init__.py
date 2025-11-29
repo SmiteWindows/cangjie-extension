@@ -1,4 +1,4 @@
-"""yes"""
+"""cangjie"""
 
 from importlib.resources import files as _files
 

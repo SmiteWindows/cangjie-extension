@@ -1,5 +1,20 @@
 // build.rs
 use std::env;
+use std::fs;
+use std::path::Path;
+
+// 从 toolchain.json 读取 WASI SDK 版本的辅助函数
+fn read_wasi_sdk_version() -> Result<String, Box<dyn std::error::Error>> {
+    let toolchain_path = Path::new("toolchain.json");
+    if toolchain_path.exists() {
+        let toolchain_content = fs::read_to_string(toolchain_path)?;
+        let toolchain: serde_json::Value = serde_json::from_str(&toolchain_content)?;
+        if let Some(wasi_sdk_version) = toolchain["versions"]["wasiSdk"].as_str() {
+            return Ok(wasi_sdk_version.to_string());
+        }
+    }
+    Err("Failed to read wasiSdk version from toolchain.json".into())
+}
 
 fn main() {
     // 获取当前目录
@@ -20,13 +35,16 @@ fn main() {
     
     // Configure for wasm32-wasip2 target using WASI SDK
     if target == "wasm32-wasip2" {
+        // 从 toolchain.json 读取 WASI SDK 版本
+        let wasi_sdk_version = read_wasi_sdk_version().unwrap_or_else(|_| "29.0".to_string());
+        
         // Get WASI SDK path from environment variable or use default
         let wasi_sdk_path = env::var("WASI_SDK_PATH").unwrap_or_else(|_| {
-            // Default paths for different platforms
+            // Default paths for different platforms with dynamic version
             if cfg!(target_os = "windows") {
-                "C:/opt/wasi-sdk-29.0".to_string()
+                format!("C:/opt/wasi-sdk-{}", wasi_sdk_version)
             } else {
-                "/opt/wasi-sdk-29.0".to_string()
+                format!("/opt/wasi-sdk-{}", wasi_sdk_version)
             }
         });
         
