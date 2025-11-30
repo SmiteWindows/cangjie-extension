@@ -4,3 +4,6 @@
 [submodule "cangjie_docs"]
 	path = cangjie_docs
 	url = ./cangjie_docs
+[submodule "cangjie_test"]
+	path = cangjie_test
+	url = ./cangjie_test

@@ -73,11 +73,9 @@ yarn-error.log*
 .env.*.local
 
 # Submodules to ignore
-cangjie_test/
 grammars/cangjie/
 
 # Documentation directories
-cangjie_docs/
 历史文档/
 
 # Additional Rust build artifacts
