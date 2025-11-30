@@ -1,0 +1,3 @@
+[submodule "tree-sitter-cangjie"]
+	path = tree-sitter-cangjie
+	url = ./tree-sitter-cangjie
