@@ -143,7 +143,6 @@ logs/
 # Additional Tree-sitter files
 **/tree-sitter-*/src/parser.c
 **/tree-sitter-*/src/parser.h
-**/tree-sitter-*/src/scanner.c
 **/tree-sitter-*/src/scanner.cc
 **/tree-sitter-*/src/scanner.h
 **/tree-sitter-*/src/tree_sitter/

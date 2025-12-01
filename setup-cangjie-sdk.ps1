@@ -1,7 +1,20 @@
 # Setup Cangjie SDK Script for Windows
 # This script downloads, installs, and configures the Cangjie SDK
 
-#Requires -Version 7.0
+# Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}
 
 param(
     [string]$SdkVersion = "1.0.4",
@@ -353,3 +366,4 @@ Write-Host "2. Run 'cjc --version' to verify the compiler is working"
 Write-Host "3. Run 'cjpm --version' to verify the package manager is working"
 Write-Host "4. Start developing with Cangjie!"
 Write-Host ""
+

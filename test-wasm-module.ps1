@@ -1,4 +1,17 @@
-#Requires -Version 7.0
+# Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}
 
 <#
 .SYNOPSIS
@@ -646,4 +659,5 @@ Write-Host "   - Use -WasmTarget to specify different WASM targets" -ForegroundC
 Write-Host "   - Use -InstallWasmtime for automatic wasmtime installation" -ForegroundColor Magenta
 Write-Host "   - Use -RunModule to execute the WASM module after validation" -ForegroundColor Magenta
 Write-Host ""
+
 

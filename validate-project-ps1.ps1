@@ -1,4 +1,17 @@
-#Requires -Version 7.0
+# Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}
 
 # Simple script to validate project PS1 files only
 
@@ -46,11 +59,50 @@ foreach ($fileName in $projectPs1Files) {
     
     $fileValid = $true
     
-    # Check for #Requires -Version 7.0
-    if ($content -match '#Requires -Version\s+7\.0') {
-        Write-Host "  - Has #Requires -Version 7.0: ✓" -ForegroundColor Green
+    # Check for # Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
     } else {
-        Write-Host "  - Has #Requires -Version 7.0: ✗" -ForegroundColor Red
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}
+    if ($content -match '#Requires -Version\s+7\.0') {
+        Write-Host "  - Has # Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}: ✓" -ForegroundColor Green
+    } else {
+        Write-Host "  - Has # Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}: ✗" -ForegroundColor Red
         $fileValid = $false
     }
     
@@ -80,3 +132,4 @@ Write-Host "Valid files: $validCount" -ForegroundColor Green
 Write-Host "Invalid files: $invalidCount" -ForegroundColor Red
 Write-Host "=" * 80
 Write-Host "Validation completed." -ForegroundColor Green
+

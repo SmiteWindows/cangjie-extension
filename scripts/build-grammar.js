@@ -1,6 +1,7 @@
 // scripts/build-grammar.js
 import { existsSync, readFileSync, writeFileSync, copyFileSync } from "fs";
 import { join, dirname } from "path";
+import path from "path";
 import { fileURLToPath } from "url";
 import { execSync, spawnSync } from "child_process";
 

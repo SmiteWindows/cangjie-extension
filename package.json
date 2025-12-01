@@ -12,7 +12,7 @@
     "generate": "cd tree-sitter-cangjie && npx tree-sitter generate",
     "test": "cd tree-sitter-cangjie && npx tree-sitter test",
     "test-rust": "cd tree-sitter-cangjie && cargo test",
-    "clean": "rm -rf tree-sitter-cangjie/src/parser.c tree-sitter-cangjie/src/parser.h tree-sitter-cangjie/src/tree_sitter/*.h tree-sitter-cangjie.wasm"
+    "clean": "node -e \"const fs = require('fs'); const path = require('path'); const files = ['tree-sitter-cangjie/src/parser.c', 'tree-sitter-cangjie/src/parser.h', 'tree-sitter-cangjie.wasm']; files.forEach(file => { try { if (fs.existsSync(file)) fs.unlinkSync(file); } catch (e) {} }); try { if (fs.existsSync('tree-sitter-cangjie/src/tree_sitter')) fs.rmSync('tree-sitter-cangjie/src/tree_sitter', { recursive: true, force: true }); } catch (e) {} \""
   },
   "devDependencies": {
     "tree-sitter-cli": "^0.25.10"

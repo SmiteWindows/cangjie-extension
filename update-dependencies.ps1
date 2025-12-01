@@ -2,15 +2,28 @@
 # This script updates all dependencies and ensures the project still works correctly
 # It reads toolchain versions from toolchain.json and synchronizes them across all files
 
-#Requires -Version 7.0
-
 using namespace System.IO
 
+# Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}
+
 param(
-    [switch]$DryRun = $false,
-    [switch]$SkipTests = $false,
-    [switch]$Help = $false,
-    [switch]$ValidateOnly = $false
+    [switch]$DryRun,
+    [switch]$SkipTests,
+    [switch]$Help,
+    [switch]$ValidateOnly
 )
 
 # Function to show help information
@@ -117,6 +130,122 @@ function Update-PackageJson {
     } catch {
         $errorMsg = $_.Exception.Message
         Write-Host "❌ Error updating $packageJsonPath`: $errorMsg" -ForegroundColor Red
+        exit 1
+    }
+}
+
+# Function to update toolchain.json based on actual installed versions
+function Update-ToolchainJson {
+    param(
+        [PSCustomObject]$CurrentToolchainConfig
+    )
+    
+    $toolchainJsonPath = "toolchain.json"
+    if (-not (Test-Path -Path $toolchainJsonPath -PathType Leaf)) {
+        Write-Host "❌ Error: $toolchainJsonPath not found." -ForegroundColor Red
+        exit 1
+    }
+    
+    try {
+        # Deep copy the configuration object
+        $updatedConfig = $CurrentToolchainConfig | ConvertTo-Json -Depth 100 | ConvertFrom-Json
+        $changesMade = $false
+        
+        # Get actual installed versions
+        Write-Host "🔍 Checking actual installed dependency versions..." -ForegroundColor Cyan
+        
+        # Check Node.js version
+        $nodeVersion = (node --version 2>$null) -replace 'v', ''
+        if ($nodeVersion) {
+            $majorNodeVersion = $nodeVersion.Split('.')[0]
+            if ($majorNodeVersion -ne $updatedConfig.versions.node) {
+                Write-Host "📦 Node.js version mismatch. Current: $majorNodeVersion, Configured: $($updatedConfig.versions.node)" -ForegroundColor Yellow
+                $updatedConfig.versions.node = $majorNodeVersion
+                $changesMade = $true
+            } else {
+                Write-Host "✅ Node.js version is consistent: $majorNodeVersion" -ForegroundColor Green
+            }
+        }
+        
+        # Check tree-sitter-cli version from package.json
+        $packageJson = Get-Content -Path "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($packageJson.devDependencies."tree-sitter-cli") {
+            $actualTreeSitterCliVersion = $packageJson.devDependencies."tree-sitter-cli"
+            if ($actualTreeSitterCliVersion -ne $updatedConfig.versions.treeSitterCli) {
+                Write-Host "📦 tree-sitter-cli version mismatch. Current: $actualTreeSitterCliVersion, Configured: $($updatedConfig.versions.treeSitterCli)" -ForegroundColor Yellow
+                $updatedConfig.versions.treeSitterCli = $actualTreeSitterCliVersion
+                $changesMade = $true
+            } else {
+                Write-Host "✅ tree-sitter-cli version is consistent: $actualTreeSitterCliVersion" -ForegroundColor Green
+            }
+        }
+        
+        # Check Rust version
+        $rustVersion = (rustc --version 2>$null) -replace 'rustc ', '' -split ' ' | Select-Object -First 1
+        if ($rustVersion) {
+            # For Rust, we just check if it's stable, beta, or nightly
+            $rustChannel = $rustVersion -split '-' | Select-Object -Last 1
+            if ($rustChannel -notin @('stable', 'beta', 'nightly')) {
+                $rustChannel = 'stable' # Default to stable if we can't determine
+            }
+            if ($rustChannel -ne $updatedConfig.versions.rust) {
+                Write-Host "📦 Rust channel mismatch. Current: $rustChannel, Configured: $($updatedConfig.versions.rust)" -ForegroundColor Yellow
+                $updatedConfig.versions.rust = $rustChannel
+                $changesMade = $true
+            } else {
+                Write-Host "✅ Rust channel is consistent: $rustChannel" -ForegroundColor Green
+            }
+        }
+        
+        # Check Go version
+        $goVersion = (go version 2>$null) -replace 'go version go', '' -split ' ' | Select-Object -First 1
+        if ($goVersion) {
+            $majorMinorGoVersion = $goVersion.Split('.')[0..1] -join '.'
+            if ($majorMinorGoVersion -ne $updatedConfig.versions.go) {
+                Write-Host "📦 Go version mismatch. Current: $majorMinorGoVersion, Configured: $($updatedConfig.versions.go)" -ForegroundColor Yellow
+                $updatedConfig.versions.go = $majorMinorGoVersion
+                $changesMade = $true
+            } else {
+                Write-Host "✅ Go version is consistent: $majorMinorGoVersion" -ForegroundColor Green
+            }
+        }
+        
+        # Check Python version
+        $pythonVersion = (python --version 2>$null) -replace 'Python ', ''
+        if (-not $pythonVersion) {
+            $pythonVersion = (py --version 2>$null) -replace 'Python ', ''
+        }
+        if ($pythonVersion) {
+            $majorMinorPythonVersion = $pythonVersion.Split('.')[0..1] -join '.'
+            if ($majorMinorPythonVersion -ne $updatedConfig.versions.python) {
+                Write-Host "📦 Python version mismatch. Current: $majorMinorPythonVersion, Configured: $($updatedConfig.versions.python)" -ForegroundColor Yellow
+                $updatedConfig.versions.python = $majorMinorPythonVersion
+                $changesMade = $true
+            } else {
+                Write-Host "✅ Python version is consistent: $majorMinorPythonVersion" -ForegroundColor Green
+            }
+        }
+        
+        # Write updated toolchain.json if changes were made
+        if ($changesMade) {
+            Write-Host "
+📝 Updating toolchain.json with actual installed versions..." -ForegroundColor Yellow
+            
+            if (-not $DryRun) {
+                $updatedConfig | ConvertTo-Json -Depth 100 | Set-Content -Path $toolchainJsonPath -Encoding UTF8
+                Write-Host "✅ toolchain.json updated successfully" -ForegroundColor Green
+            } else {
+                Write-Host "⚠️  Dry run: toolchain.json would be updated with actual installed versions" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "
+✅ All dependency versions are consistent with toolchain.json" -ForegroundColor Green
+        }
+        
+        return $updatedConfig
+    } catch {
+        $errorMsg = $_.Exception.Message
+        Write-Host "❌ Error updating $toolchainJsonPath`: $errorMsg" -ForegroundColor Red
         exit 1
     }
 }
@@ -264,6 +393,9 @@ if (Test-Path -Path "Cargo.toml" -PathType Leaf) {
         Pop-Location
     }
 }
+
+# Update toolchain.json based on actual installed versions
+$toolchainConfig = Update-ToolchainJson -CurrentToolchainConfig $toolchainConfig
 
 # Run tests if not skipped
 if (-not $SkipTests) {
