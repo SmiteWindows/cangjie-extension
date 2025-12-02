@@ -1,6 +1,4 @@
 #Requires -Version 7.0
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
 
 <#
 .SYNOPSIS
@@ -33,6 +31,9 @@ param(
     [string]$Path = $PSScriptRoot,
     [switch]$Recurse = $true
 )
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 # Get all PS1 scripts except those in node_modules
 $ps1Scripts = Get-ChildItem -Path "$Path" -Filter "*.ps1" -Recurse:$Recurse | 

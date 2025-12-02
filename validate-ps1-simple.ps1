@@ -43,8 +43,6 @@
 #>
 
 #Requires -Version 7.0
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
 
 param(
     [string]$Path = ".",
@@ -52,6 +50,9 @@ param(
     [switch]$ExcludeNodeModules = $true,
     [switch]$Quiet = $false
 )
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 # Ensure PowerShell 7 environment
 if ($PSVersionTable.PSVersion.Major -lt 7) {
