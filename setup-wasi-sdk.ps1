@@ -1,5 +1,53 @@
-# Setup WASI SDK Script for Cangjie Extension
-# This script helps configure the WASI_SDK_PATH environment variable
+<#
+.SYNOPSIS
+    Configures the WASI SDK environment for the Cangjie Extension.
+
+.DESCRIPTION
+    This script sets up the WASI_SDK_PATH environment variable required for building
+    WebAssembly (WASM) components for the Cangjie Extension. It validates the provided
+    WASI SDK directory and configures the environment variable with the specified scope.
+
+.PARAMETER WasiSdkPath
+    The path to the extracted WASI SDK directory (e.g., "C:\Users\username\Downloads\wasi-sdk-29.0").
+    If not provided, the script will prompt for this information.
+
+.PARAMETER Scope
+    The scope for the environment variable. Valid values are "User" (default) or "Machine".
+    "User" sets the variable for the current user only.
+    "Machine" sets the variable system-wide and requires administrator privileges.
+
+.PARAMETER Help
+    If specified, displays this help information and exits.
+
+.EXAMPLE
+    .\setup-wasi-sdk.ps1 -WasiSdkPath "C:\Users\username\Downloads\wasi-sdk-29.0"
+    Configures the WASI SDK with the specified path for the current user.
+
+.EXAMPLE
+    .\setup-wasi-sdk.ps1 -WasiSdkPath "D:\wasi-sdk-29.0" -Scope Machine
+    Configures the WASI SDK system-wide with the specified path.
+
+.EXAMPLE
+    .\setup-wasi-sdk.ps1 -Help
+    Displays help information.
+
+.NOTES
+    This script requires PowerShell 7 or later.
+    Administrator privileges are required for system-wide (Machine) configuration.
+    The script validates the WASI SDK directory by checking for expected files.
+    It sets the WASI_SDK_PATH environment variable both for the current session and permanently.
+    The WASI SDK is required for building WebAssembly components for the Cangjie Extension.
+#>
+
+#Requires -Version 7.0
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+param(
+    [string]$WasiSdkPath,
+    [string]$Scope = "User",
+    [switch]$Help = $false
+)
 
 # Ensure PowerShell 7 environment
 if ($PSVersionTable.PSVersion.Major -lt 7) {
@@ -15,12 +63,6 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
         exit 1
     }
 }
-
-param(
-    [string]$WasiSdkPath,
-    [string]$Scope = "User",
-    [switch]$Help = $false
-)
 
 # Function to show help information
 function Show-Help {
@@ -193,4 +235,5 @@ Set-WasiSdkPath -Path $WasiSdkPath -Scope $Scope
 
 Write-Host "🎉 WASI SDK setup completed successfully!" -ForegroundColor Green
 Write-Host ""
+
 

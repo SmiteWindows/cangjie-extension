@@ -1,5 +1,61 @@
-# Setup Cangjie SDK Script for Windows
-# This script downloads, installs, and configures the Cangjie SDK
+<#
+.SYNOPSIS
+    Downloads, installs, and configures the Cangjie SDK on Windows.
+
+.DESCRIPTION
+    This script automates the process of downloading the specified version of the Cangjie SDK,
+    installing it to the specified directory, and configuring the necessary environment variables.
+    It supports both x86_64 and aarch64 architectures.
+
+.PARAMETER SdkVersion
+    The version of the Cangjie SDK to install. Defaults to "1.0.4".
+
+.PARAMETER InstallPath
+    The directory where the Cangjie SDK will be installed. Defaults to "C:\Program Files\Cangjie".
+
+.PARAMETER Force
+    If specified, forces installation even if the directory already exists, overwriting any existing files.
+
+.PARAMETER Help
+    If specified, displays this help information and exits.
+
+.PARAMETER NoAdminCheck
+    If specified, skips the administrator privilege check. Not recommended for system-wide installations.
+
+.EXAMPLE
+    .\setup-cangjie-sdk.ps1
+    Installs the default version of the Cangjie SDK to the default directory.
+
+.EXAMPLE
+    .\setup-cangjie-sdk.ps1 -SdkVersion 1.0.4 -InstallPath D:\Cangjie
+    Installs version 1.0.4 of the Cangjie SDK to the D:\Cangjie directory.
+
+.EXAMPLE
+    .\setup-cangjie-sdk.ps1 -Force
+    Forces reinstallation of the SDK, overwriting any existing files.
+
+.EXAMPLE
+    .\setup-cangjie-sdk.ps1 -Help
+    Displays help information.
+
+.NOTES
+    This script requires PowerShell 7 or later.
+    Administrator privileges are recommended for system-wide installations.
+    The script automatically handles architecture detection (x86_64, aarch64).
+    It sets the CANGJIE_HOME environment variable and adds the bin directory to the PATH.
+#>
+
+#Requires -Version 7.0
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+param(
+    [string]$SdkVersion = "1.0.4",
+    [string]$InstallPath,
+    [switch]$Force = $false,
+    [switch]$Help = $false,
+    [switch]$NoAdminCheck = $false
+)
 
 # Ensure PowerShell 7 environment
 if ($PSVersionTable.PSVersion.Major -lt 7) {
@@ -15,14 +71,6 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
         exit 1
     }
 }
-
-param(
-    [string]$SdkVersion = "1.0.4",
-    [string]$InstallPath,
-    [switch]$Force = $false,
-    [switch]$Help = $false,
-    [switch]$NoAdminCheck = $false
-)
 
 # Function to get system architecture
 function Get-SystemArchitecture {
@@ -366,4 +414,5 @@ Write-Host "2. Run 'cjc --version' to verify the compiler is working"
 Write-Host "3. Run 'cjpm --version' to verify the package manager is working"
 Write-Host "4. Start developing with Cangjie!"
 Write-Host ""
+
 

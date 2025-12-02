@@ -1,4 +1,89 @@
-# Tree-sitter Tools Script for Cangjie Language
+using namespace System.IO
+
+<#
+.SYNOPSIS
+    Tree-sitter Tools Script for Cangjie Language.
+
+.DESCRIPTION
+    This script provides a comprehensive set of tools for managing the Tree-sitter parser
+    for the Cangjie language. It includes functionality for building, testing, cleaning,
+    updating grammar files, and managing test files from external repositories.
+
+.PARAMETER Action
+    The action to perform. Valid values are:
+    - build           - Build Tree-sitter parser and WASM modules
+    - test            - Run Tree-sitter tests
+    - copy-tests      - Copy test files from external repository
+    - clean           - Clean generated files
+    - update-grammar  - Update grammar files
+    - check-deps      - Check dependencies
+    - clone-tests     - Clone external test repository
+    - help            - Show help information
+    Default: help
+
+.PARAMETER SourceDir
+    The source directory for test files when copying from external repository.
+    Default: cangjie_test
+
+.PARAMETER TargetDirs
+    The target directories where test files will be copied.
+    Default: @("tests", "tree-sitter-cangjie/tests")
+
+.PARAMETER Count
+    The number of test files to copy from the external repository.
+    Default: 50
+
+.PARAMETER RepoUrl
+    The Git URL for the external test repository.
+    Default: https://gitcode.com/Cangjie/cangjie_test
+
+.PARAMETER Branch
+    The branch of the external test repository to clone or update.
+    Default: main
+
+.EXAMPLE
+    .\tree-sitter-tools.ps1 -Action build
+    Builds the Tree-sitter parser and WASM modules.
+
+.EXAMPLE
+    .\tree-sitter-tools.ps1 -Action test
+    Runs the Tree-sitter tests.
+
+.EXAMPLE
+    .\tree-sitter-tools.ps1 -Action copy-tests -Count 100
+    Copies 100 test files from the external repository.
+
+.EXAMPLE
+    .\tree-sitter-tools.ps1 -Action clone-tests -RepoUrl "https://github.com/user/test-repo"
+    Clones a custom test repository.
+
+.EXAMPLE
+    .\tree-sitter-tools.ps1 -Action clean
+    Cleans all generated files.
+
+.EXAMPLE
+    .\tree-sitter-tools.ps1 -Action update-grammar
+    Updates the grammar files using tree-sitter-cli.
+
+.NOTES
+    This script requires PowerShell 7 or later.
+    It uses external tools like git, cargo, node, npm, and tree-sitter-cli.
+    The script will automatically attempt to install tree-sitter-cli if not found.
+    WASM modules are built for both wasi (wasm32-wasip2) and web (wasm32-unknown-unknown) targets.
+#>
+
+#Requires -Version 7.0
+Set-StrictMode -Version Latest
+
+param(
+    [string]$Action = "help",
+    [string]$SourceDir = "cangjie_test",
+    [array]$TargetDirs = @("tests", "tree-sitter-cangjie/tests"),
+    [int]$Count = 50,
+    [string]$RepoUrl = "https://gitcode.com/Cangjie/cangjie_test",
+    [string]$Branch = "main"
+)
+
 # Ensure PowerShell 7 environment
 if ($PSVersionTable.PSVersion.Major -lt 7) {
     Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
@@ -13,17 +98,6 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
         exit 1
     }
 }
-
-using namespace System.IO
-
-param(
-    [string]$Action = "help",
-    [string]$SourceDir = "cangjie_test",
-    [array]$TargetDirs = @("tests", "tree-sitter-cangjie/tests"),
-    [int]$Count = 50,
-    [string]$RepoUrl = "https://gitcode.com/Cangjie/cangjie_test",
-    [string]$Branch = "main"
-)
 
 # Function to show help information
 function Show-Help {
@@ -374,3 +448,4 @@ switch ($Action) {
 }
 
 Write-Host "Operation completed!"
+

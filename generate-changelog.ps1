@@ -1,3 +1,7 @@
+#Requires -Version 7.0
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
 # Ensure PowerShell 7 environment
 if ($PSVersionTable.PSVersion.Major -lt 7) {
     Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
@@ -279,4 +283,5 @@ try {
     Write-Error "Error writing to file ${OutputFile}: $($_.Exception.Message)"
     exit 1
 }
+
 

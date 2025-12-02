@@ -1,17 +1,6 @@
-# Ensure PowerShell 7 environment
-if ($PSVersionTable.PSVersion.Major -lt 7) {
-    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
-    
-    # Check if pwsh is available
-    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
-        # Restart the script in PowerShell 7
-        pwsh -File $PSCommandPath @args
-        exit $LASTEXITCODE
-    } else {
-        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
-        exit 1
-    }
-}
+#Requires -Version 7.0
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 <#
 .SYNOPSIS
@@ -51,13 +40,28 @@ param(
     [array]$Files = @()
 )
 
+# Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}
+
 # Function to get the current version from package.json
 function Get-CurrentVersion {
     if (Test-Path -Path "package.json") {
-        $packageJson = Get-Content -Path "package.json" -Raw | ConvertFrom-Json
+        $packageJson = Get-Content  -Encoding UTF8 "package.json" -Raw | ConvertFrom-Json
         return $packageJson.version
     } elseif (Test-Path -Path "extension.toml") {
-        $extensionToml = Get-Content -Path "extension.toml" -Raw
+        $extensionToml = Get-Content  -Encoding UTF8 "extension.toml" -Raw
         if ($extensionToml -match 'version\s*=\s*"([^"]+)"') {
             return $Matches[1]
         }
@@ -107,14 +111,14 @@ function Update-PackageJson {
     )
 
     if (Test-Path -Path "package.json") {
-        $packageJson = Get-Content -Path "package.json" -Raw | ConvertFrom-Json
+        $packageJson = Get-Content  -Encoding UTF8 "package.json" -Raw | ConvertFrom-Json
         $oldVersion = $packageJson.version
         $packageJson.version = $NewVersion
         
         if ($Preview) {
             Write-Host "Would update package.json: $oldVersion -> $NewVersion" -ForegroundColor Yellow
         } else {
-            $packageJson | ConvertTo-Json -Depth 100 | Set-Content -Path "package.json"
+            $packageJson | ConvertTo-Json -Depth 100 | Set-Content  -Encoding UTF8 "package.json"
             Write-Host "✓ Updated package.json: $oldVersion -> $NewVersion" -ForegroundColor Green
         }
     }
@@ -128,7 +132,7 @@ function Update-ExtensionToml {
     )
 
     if (Test-Path -Path "extension.toml") {
-        $extensionToml = Get-Content -Path "extension.toml" -Raw
+        $extensionToml = Get-Content  -Encoding UTF8 "extension.toml" -Raw
         if ($extensionToml -match 'version\s*=\s*"([^"]+)"') {
             $oldVersion = $Matches[1]
             $pattern = 'version\s*=\s*"' + [regex]::Escape($oldVersion) + '"'
@@ -138,7 +142,7 @@ function Update-ExtensionToml {
             if ($Preview) {
                 Write-Host "Would update extension.toml: $oldVersion -> $NewVersion" -ForegroundColor Yellow
             } else {
-                Set-Content -Path "extension.toml" -Value $newContent
+                Set-Content  -Encoding UTF8 "extension.toml" -Value $newContent
                 Write-Host "✓ Updated extension.toml: $oldVersion -> $NewVersion" -ForegroundColor Green
             }
         }
@@ -156,7 +160,7 @@ function Update-AdditionalFiles {
 
     foreach ($file in $Files) {
         if (Test-Path -Path $file) {
-            $content = Get-Content -Path $file -Raw
+            $content = Get-Content  -Encoding UTF8 $file -Raw
             $oldContent = $content
             $content = $content -replace $CurrentVersion, $NewVersion
             
@@ -164,7 +168,7 @@ function Update-AdditionalFiles {
                 if ($Preview) {
                     Write-Host "Would update ${file}: $CurrentVersion -> $NewVersion" -ForegroundColor Yellow
                 } else {
-                    Set-Content -Path $file -Value $content
+                    Set-Content  -Encoding UTF8 $file -Value $content
                     Write-Host "✓ Updated ${file}: $CurrentVersion -> $NewVersion" -ForegroundColor Green
                 }
             }
@@ -221,4 +225,5 @@ if ($Preview) {
     Write-Host "Version bump completed successfully!" -ForegroundColor Green
     Write-Host "To push the new tag, run: git push origin v$newVersion" -ForegroundColor Cyan
 }
+
 

@@ -1,17 +1,6 @@
-# Ensure PowerShell 7 environment
-if ($PSVersionTable.PSVersion.Major -lt 7) {
-    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
-    
-    # Check if pwsh is available
-    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
-        # Restart the script in PowerShell 7
-        pwsh -File $PSCommandPath @args
-        exit $LASTEXITCODE
-    } else {
-        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
-        exit 1
-    }
-}
+#Requires -Version 7.0
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 <#
 .SYNOPSIS
@@ -50,9 +39,20 @@ param(
     [switch]$Help = $false
 )
 
-# Set strict mode for better error handling
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
+# Ensure PowerShell 7 environment
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "This script requires PowerShell 7 or later. Attempting to switch to PowerShell 7..." -ForegroundColor Yellow
+    
+    # Check if pwsh is available
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        # Restart the script in PowerShell 7
+        pwsh -File $PSCommandPath @args
+        exit $LASTEXITCODE
+    } else {
+        Write-Host "PowerShell 7 (pwsh) is not installed. Please install PowerShell 7 and try again." -ForegroundColor Red
+        exit 1
+    }
+}
 
 # Show help if requested
 if ($Help) {
@@ -65,7 +65,7 @@ $WASMTIME_RELEASES_URL = "https://github.com/bytecodealliance/wasmtime/releases"
 
 # 从toolchain.json读取Wasmtime版本
 $toolchainPath = Join-Path -Path $PSScriptRoot -ChildPath "toolchain.json"
-$toolchainContent = Get-Content -Path $toolchainPath -Raw -Encoding utf8
+$toolchainContent = Get-Content  -Encoding UTF8 $toolchainPath -Raw -Encoding utf8
 $toolchain = ConvertFrom-Json -InputObject $toolchainContent
 $WASMTIME_LATEST_VERSION = "v$($toolchain.versions.wasmtime)"
 
@@ -659,5 +659,6 @@ Write-Host "   - Use -WasmTarget to specify different WASM targets" -ForegroundC
 Write-Host "   - Use -InstallWasmtime for automatic wasmtime installation" -ForegroundColor Magenta
 Write-Host "   - Use -RunModule to execute the WASM module after validation" -ForegroundColor Magenta
 Write-Host ""
+
 
 

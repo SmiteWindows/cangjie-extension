@@ -1,8 +1,56 @@
-# Update Dependencies Script for Cangjie Extension
-# This script updates all dependencies and ensures the project still works correctly
-# It reads toolchain versions from toolchain.json and synchronizes them across all files
-
 using namespace System.IO
+
+<#
+.SYNOPSIS
+    Updates all dependencies for the Cangjie Extension project.
+
+.DESCRIPTION
+    This script updates all dependencies and ensures the project still works correctly.
+    It reads toolchain versions from toolchain.json and synchronizes them across all files,
+    including package.json, GitHub Actions workflows, and Rust/Cargo configurations.
+    The script supports dry runs, test skipping, and validation-only modes.
+
+.PARAMETER DryRun
+    If specified, performs a dry run without actually updating dependencies.
+    Shows what would be changed but doesn't make any modifications.
+
+.PARAMETER SkipTests
+    If specified, skips running tests after updating dependencies.
+    Useful for faster updates when you plan to run tests separately.
+
+.PARAMETER Help
+    If specified, displays this help information and exits.
+
+.PARAMETER ValidateOnly
+    If specified, validates toolchain configuration across all files without updating.
+    Checks for version mismatches between toolchain.json and actual configurations.
+
+.EXAMPLE
+    .\update-dependencies.ps1
+    Updates all dependencies and runs tests.
+
+.EXAMPLE
+    .\update-dependencies.ps1 -DryRun
+    Performs a dry run, showing what changes would be made.
+
+.EXAMPLE
+    .\update-dependencies.ps1 -SkipTests
+    Updates dependencies without running tests.
+
+.EXAMPLE
+    .\update-dependencies.ps1 -ValidateOnly
+    Validates toolchain configurations without making changes.
+
+.NOTES
+    This script requires PowerShell 7 or later.
+    It updates npm, Rust, and other dependencies based on toolchain.json.
+    The script ensures consistency across all project files and workflows.
+    It supports validation of GitHub Actions workflows, package.json, and Cargo.toml.
+    Test running includes Tree-sitter tests, Rust tests, and binding tests for Go/Python/Swift.
+#>
+
+#Requires -Version 7.0
+Set-StrictMode -Version Latest
 
 # Ensure PowerShell 7 environment
 if ($PSVersionTable.PSVersion.Major -lt 7) {
@@ -84,7 +132,7 @@ function Get-ToolchainConfig {
     }
     
     try {
-        $configContent = Get-Content -Path $ConfigPath -Raw -Encoding UTF8
+        $configContent = Get-Content  -Encoding UTF8 $ConfigPath -Raw -Encoding UTF8
         return ConvertFrom-Json -InputObject $configContent
     } catch {
             $errorMsg = $_.Exception.Message
@@ -106,7 +154,7 @@ function Update-PackageJson {
     }
     
     try {
-        $packageJson = Get-Content -Path $packageJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $packageJson = Get-Content  -Encoding UTF8 $packageJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
         
         # Update tree-sitter-cli version
         if ($packageJson.devDependencies -and $ToolchainConfig.versions.treeSitterCli) {
@@ -118,7 +166,7 @@ function Update-PackageJson {
                 
                 if (-not $DryRun) {
                     $packageJson.devDependencies."tree-sitter-cli" = $desiredVersion
-                    $packageJson | ConvertTo-Json -Depth 100 | Set-Content -Path $packageJsonPath -Encoding UTF8
+                    $packageJson | ConvertTo-Json -Depth 100 | Set-Content  -Encoding UTF8 $packageJsonPath -Encoding UTF8
                     Write-Host "✅ Updated tree-sitter-cli version in package.json" -ForegroundColor Green
                 } else {
                     Write-Host "⚠️  Dry run: Would update tree-sitter-cli from $currentVersion to $desiredVersion" -ForegroundColor Yellow
@@ -168,7 +216,7 @@ function Update-ToolchainJson {
         }
         
         # Check tree-sitter-cli version from package.json
-        $packageJson = Get-Content -Path "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+        $packageJson = Get-Content  -Encoding UTF8 "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
         if ($packageJson.devDependencies."tree-sitter-cli") {
             $actualTreeSitterCliVersion = $packageJson.devDependencies."tree-sitter-cli"
             if ($actualTreeSitterCliVersion -ne $updatedConfig.versions.treeSitterCli) {
@@ -232,7 +280,7 @@ function Update-ToolchainJson {
 📝 Updating toolchain.json with actual installed versions..." -ForegroundColor Yellow
             
             if (-not $DryRun) {
-                $updatedConfig | ConvertTo-Json -Depth 100 | Set-Content -Path $toolchainJsonPath -Encoding UTF8
+                $updatedConfig | ConvertTo-Json -Depth 100 | Set-Content  -Encoding UTF8 $toolchainJsonPath -Encoding UTF8
                 Write-Host "✅ toolchain.json updated successfully" -ForegroundColor Green
             } else {
                 Write-Host "⚠️  Dry run: toolchain.json would be updated with actual installed versions" -ForegroundColor Yellow
@@ -262,7 +310,7 @@ function Validate-ToolchainConfig {
     $allValid = $true
     
     # Validate package.json
-    $packageJson = Get-Content -Path "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
+    $packageJson = Get-Content  -Encoding UTF8 "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
     $currentTreeSitterCli = $packageJson.devDependencies."tree-sitter-cli"
     $desiredTreeSitterCli = $ToolchainConfig.versions.treeSitterCli
     
@@ -278,7 +326,7 @@ function Validate-ToolchainConfig {
     foreach ($workflowFile in $workflowFiles) {
         Write-Host "
 📋 Validating $($workflowFile.Name):" -ForegroundColor Yellow
-        $content = Get-Content -Path $workflowFile.FullName -Raw -Encoding UTF8
+        $content = Get-Content  -Encoding UTF8 $workflowFile.FullName -Raw -Encoding UTF8
         
         # Validate Node.js version
         $nodeVersionMatch = [regex]::Match($content, 'node-version:\s*''(\d+)''')
@@ -474,3 +522,4 @@ Write-Host "2. Commit the changes with a meaningful message, e.g. 'chore: update
 Write-Host "3. Push the changes to GitHub"
 Write-Host "4. Create a pull request if necessary"
 Write-Host ""
+
